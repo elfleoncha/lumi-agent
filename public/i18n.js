@@ -128,6 +128,15 @@ const DICT = {
     "0 MB = no rotar nunca (a cambio de respuestas más lentas cuando el fichero engorda).":
       "0 MB = never rotate (at the cost of slower answers as the file grows).",
 
+    "Rotar automáticamente": "Rotate automatically",
+    "Rotar ahora": "Rotate now",
+    "Archivando…": "Archiving…",
+    "archivada": "archived",
+    "¿Archivar esta conversación y empezar una nueva?": "Archive this conversation and start a new one?",
+    "Conversación archivada. Empezamos de cero.": "Conversation archived. Starting from scratch.",
+    "Si lo desactivas, nada se rota solo: la conversación sigue y las respuestas se van haciendo más lentas al crecer el fichero.":
+      "If you turn it off nothing rotates on its own: the conversation continues and answers get slower as the file grows.",
+
     // ---- textos generados
     "día": "day",
     "días": "days",

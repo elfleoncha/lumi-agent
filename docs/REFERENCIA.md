@@ -42,6 +42,7 @@ Todas las rutas `/api/*` (menos `login` y `health`) exigen
 | GET | `/api/history?limit=300` | Mensajes de la conversación |
 | GET | `/api/state` | `{busy, since, file}` |
 | POST | `/api/abort` | Cancela el turno en curso |
+| POST | `/api/rotate` | Archiva la conversación y empieza una nueva |
 | POST | `/api/new` | Conversación nueva |
 | POST | `/api/compact` | Compacta el contexto |
 | GET | `/api/stats` | Modelo, tokens, coste, RAM/carga, Discord |

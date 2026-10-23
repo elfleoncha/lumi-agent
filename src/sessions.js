@@ -77,7 +77,16 @@ export class SessionPool {
   /** Archiva el fichero de una conversación y deja que se cree uno limpio. */
   async rotar(key, motivo) {
     const real = this.sessions.get(key)?.file ?? this.sessionPathFor(key);
-    if (!real || !fs.existsSync(real)) return false;
+    const existe = !!real && fs.existsSync(real);
+    // Conversación recién creada (aún sin fichero): no hay nada que archivar,
+    // pero sí que reiniciar el contexto.
+    if (!existe) {
+      await this.dispose(key);
+      delete this.links[key];
+      this.#saveLinks();
+      this.log?.(`sesión reiniciada (${motivo}): no había fichero todavía`);
+      return true;
+    }
     const archivoDir = path.join(this.cfg.sessionDir, "_archivo");
     fs.mkdirSync(archivoDir, { recursive: true });
     const sello = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);

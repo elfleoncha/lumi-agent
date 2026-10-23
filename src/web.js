@@ -379,6 +379,17 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
     }
   });
 
+  // --- rotar la conversación a mano --------------------------------------
+  app.post("/api/rotate", auth, async (req, res) => {
+    try {
+      const hecho = await pool.rotar(ownerKey, "petición desde Ajustes");
+      if (!hecho) return res.status(409).json({ ok: false, error: "no hay sesión que archivar" });
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: String(e?.message ?? e) });
+    }
+  });
+
   // --- cancelar la respuesta en curso -----------------------------------
   // Importante: NO usa withSession, porque eso espera al lock y el abort
   // llegaría cuando ya ha terminado. Se aborta la sesión viva si existe.
@@ -483,7 +494,11 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
       },
       push: { ntfyTopic: c.ntfyTopic ?? "" },
       browser: { port: c.browserPort ?? 4479 },
-      session: { maxMb: c.sessionMaxMb ?? 18, checkMinutes: c.sessionCheckMinutes ?? 10 },
+      session: {
+        auto: Number(c.sessionMaxMb ?? 18) > 0,
+        maxMb: Number(c.sessionMaxMb ?? 18),
+        checkMinutes: c.sessionCheckMinutes ?? 10,
+      },
       paths: { sessionDir: c.sessionDir ?? "", skillsDir: c.skillsDir ?? "" },
     });
   });
@@ -532,8 +547,13 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
       if (b.push) c.ntfyTopic = String(b.push.ntfyTopic ?? "");
       if (b.browser?.port) c.browserPort = Number(b.browser.port);
       if (b.session) {
-        if (b.session.maxMb !== undefined && b.session.maxMb !== null) {
+        if (b.session.auto === false) {
+          // interruptor apagado: nunca rotar
+          c.sessionMaxMb = 0;
+        } else if (b.session.maxMb !== undefined && b.session.maxMb !== null) {
           c.sessionMaxMb = Math.max(0, Number(b.session.maxMb) || 0);
+        } else if (b.session.auto === true && !Number(c.sessionMaxMb)) {
+          c.sessionMaxMb = 18; // volver a activarlo con el valor por defecto
         }
         if (b.session.checkMinutes) {
           c.sessionCheckMinutes = Math.max(1, Number(b.session.checkMinutes) || 10);

@@ -199,11 +199,13 @@
           <section class="set__group">
             <h4>Sesiones</h4>
             <p class="set__note">Compactar el contexto no borra: el fichero de la conversación solo crece y cada turno cuesta más. Al pasar del tamaño indicado se archiva y se empieza una conversación nueva (queda copia en texto).</p>
+            <label class="set__check"><input name="session.auto" type="checkbox" /> Rotar automáticamente</label>
             <div class="set__row">
               <label class="set__inline">Rotar a partir de (MB) <input name="session.maxMb" type="number" min="0" step="1" placeholder="18" /></label>
               <label class="set__inline">Comprobar cada (min) <input name="session.checkMinutes" type="number" min="1" step="1" placeholder="10" /></label>
+              <button type="button" class="btn-ghost" id="rotateNow">Rotar ahora</button>
             </div>
-            <p class="set__hint">0 MB = no rotar nunca (a cambio de respuestas más lentas cuando el fichero engorda).</p>
+            <p class="set__hint" id="rotHint">Si lo desactivas, nada se rota solo: la conversación sigue y las respuestas se van haciendo más lentas al crecer el fichero.</p>
           </section>
 
           <section class="set__group">

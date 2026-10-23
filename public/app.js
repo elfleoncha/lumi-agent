@@ -1444,6 +1444,7 @@ const SET_MAP = [
   ["voice.mediaBase", "voice", "mediaBase"],
   ["push.ntfyTopic", "push", "ntfyTopic"],
   ["browser.port", "browser", "port"],
+  ["session.auto", "session", "auto"],
   ["session.maxMb", "session", "maxMb"],
   ["session.checkMinutes", "session", "checkMinutes"],
 ];
@@ -1505,6 +1506,7 @@ $("settingsForm")?.addEventListener("submit", async (e) => {
     push: { ntfyTopic: form.elements["push.ntfyTopic"].value },
     browser: { port: num(form.elements["browser.port"].value) },
     session: {
+      auto: form.elements["session.auto"].checked,
       maxMb: num(form.elements["session.maxMb"].value),
       checkMinutes: num(form.elements["session.checkMinutes"].value),
     },
@@ -1537,6 +1539,40 @@ $("settingsForm")?.addEventListener("submit", async (e) => {
     decir("⚠ " + err.message, true);
   } finally {
     if (botonGuardar) botonGuardar.textContent = textoBoton;
+  }
+});
+
+/* El interruptor desactiva los campos numéricos (no tienen sentido apagado) */
+(() => {
+  const auto = document.querySelector('input[name="session.auto"]');
+  const campos = ['session.maxMb', 'session.checkMinutes'].map((n) =>
+    document.querySelector(`input[name="${n}"]`),
+  );
+  if (!auto) return;
+  const reflejar = () => campos.forEach((c) => c && (c.disabled = !auto.checked));
+  auto.addEventListener("change", reflejar);
+  reflejar();
+})();
+
+/* Rotar la conversación a mano (archiva y empieza limpia) */
+$("rotateNow")?.addEventListener("click", async () => {
+  if (!confirm(t("¿Archivar esta conversación y empezar una nueva?"))) return;
+  const b = $("rotateNow");
+  b.disabled = true;
+  b.textContent = t("Archivando…");
+  try {
+    const res = await api("/api/rotate", { method: "POST" });
+    const d = await res.json();
+    if (!res.ok || !d.ok) throw new Error(d.error || "error");
+    $("msgs").innerHTML = "";
+    addMsg("assistant", t("Conversación archivada. Empezamos de cero."));
+    refreshStats();
+    $("setHint").textContent = "✓ " + t("archivada");
+  } catch (e) {
+    $("setHint").textContent = "⚠ " + e.message;
+  } finally {
+    b.disabled = false;
+    b.textContent = t("Rotar ahora");
   }
 });
 
