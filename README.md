@@ -164,10 +164,14 @@ En Discord y en la terminal `lumi`:
 /help     comandos disponibles        /model    ver o cambiar modelo
 /status   modelo, tokens y coste      /thinking nivel de razonamiento
 /new      conversación nueva          /compact  compactar contexto
-/session  info de la sesión           /list     sesiones guardadas
-/skills   skills disponibles          /run      ejecutar una skill
+/name     nombrar la sesión           /session  info de la sesión
+/list     sesiones guardadas          /link     enlazar a otra sesión
+/linkmain enlazar a la principal      /skills   skills disponibles
+/reload   recargar skills             /run      ejecutar una skill
 /abort    cancelar la respuesta       /tts      enviar una nota de voz
 ```
+
+Lista completa, con la API y todas las variables: [docs/REFERENCIA.md](docs/REFERENCIA.md).
 
 ## Capturas
 
@@ -216,6 +220,15 @@ npm run check:secrets   # nada personal en el repo
 ```
 
 GitHub Actions ejecuta las tres en cada push (Node 20 y 22).
+
+## Documentación
+
+- [Referencia](docs/REFERENCIA.md) — comandos, API del panel, todas las claves de
+  configuración y qué ficheros crea.
+- [Problemas frecuentes](docs/PROBLEMAS.md) — "no contesta", certificado, puertos,
+  Discord, voz, fuerza bruta...
+- [Extras](docs/AVANZADO.md) — HTTPS con Tailscale o dominio propio, ntfy, voz,
+  navegador en vivo, compilar la APK, actualizar y desinstalar.
 
 ## Seguridad (leer antes de exponerlo)
 

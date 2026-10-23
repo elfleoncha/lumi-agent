@@ -220,6 +220,18 @@ npm run check:secrets   # nothing personal in the repo
 
 GitHub Actions runs all three on every push (Node 20 and 22).
 
+## Documentation
+
+Detailed docs (Spanish for now, translations welcome — see
+[CONTRIBUTING.md](CONTRIBUTING.md)):
+
+- [Reference](docs/REFERENCIA.md) — commands, panel API, every config key and the
+  files it creates.
+- [Troubleshooting](docs/PROBLEMAS.md) — "it doesn't answer", certificates, ports,
+  Discord, voice, brute-force lockout...
+- [Extras](docs/AVANZADO.md) — HTTPS with Tailscale or your own domain, ntfy, voice,
+  live browser, building the APK, upgrading and uninstalling.
+
 ## Security (read before exposing it)
 
 - The panel is meant for **LAN or Tailscale**, not the open internet. If you

@@ -7,7 +7,9 @@
     "start": "node src/index.js",
     "start:web": "LUMI_NO_DISCORD=1 node src/index.js",
     "check:secrets": "./scripts/check-secrets.sh",
-    "lint": "node --check src/index.js && node --check src/web.js && node --check public/app.js"
+    "lint": "node --check src/index.js && node --check src/web.js && node --check public/app.js",
+    "test": "./scripts/smoke-test.sh",
+    "setup": "node src/index.js"
   },
   "dependencies": {
     "@earendil-works/pi-coding-agent": "1.4.0",
