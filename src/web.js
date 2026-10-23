@@ -44,6 +44,9 @@ function realSessionFile(pool, key) {
   return candidatos.find(Boolean) ?? null;
 }
 
+const escapeHtml = (t) =>
+  String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
 export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
   const app = express();
   app.disable("x-powered-by");
@@ -895,11 +898,33 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
   });
 
   // --- estáticos ---
-  app.use(express.static(path.join(__dirname, "..", "public"), { etag: true, maxAge: 0 }));
-  app.get("/", (req, res) => {
+  // --- HTML con el branding ya puesto -----------------------------------
+  // Se renderiza una vez al arrancar: así el <title>, la pestaña y la PWA
+  // salen con el nombre de tu instancia desde el primer byte, sin esperar a
+  // JavaScript. Va ANTES de express.static o el estático sirve la plantilla.
+  let htmlIndex = null;
+  const renderIndex = () => {
+    if (!htmlIndex) {
+      const plantilla = fs.readFileSync(path.join(__dirname, "..", "public", "index.html"), "utf8");
+      const b = branding;
+      htmlIndex = plantilla
+        .replaceAll("{{NAME}}", escapeHtml(b.name))
+        .replaceAll("{{SHORT}}", escapeHtml(b.short || b.name))
+        .replaceAll("{{TAGLINE}}", escapeHtml(b.tagline || ""));
+    }
+    return htmlIndex;
+  };
+
+  app.get(["/", "/index.html"], (req, res) => {
     res.set("Cache-Control", "no-store");
-    res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+    try {
+      res.type("html").send(renderIndex());
+    } catch {
+      res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+    }
   });
+
+  app.use(express.static(path.join(__dirname, "..", "public"), { etag: true, maxAge: 0 }));
 
   return app;
 }
