@@ -41,13 +41,14 @@ cd "$DESTINO"
 echo "· dependencias de Node"
 npm install --omit=dev --no-audit --no-fund
 
-[ -f config.json ] || { cp config.example.json config.json; aviso "  creado config.json — edita ownerIds y appName"; }
-[ -f secret.json ] || {
-  cp secret.example.json secret.json
-  chmod 600 secret.json
-  aviso "  creado secret.json — pon tu token de Discord y tu webPassword"
-}
-chmod 600 config.json secret.json 2>/dev/null || true
+# La configuración la pide el propio Lumi en el primer arranque (formulario en
+# el puerto del panel). Aquí solo aseguramos permisos si ya existen.
+if [ -f config.json ] || [ -f secret.json ]; then
+  chmod 600 config.json secret.json 2>/dev/null || true
+  verde "  hay configuración previa, no la toco"
+else
+  echo "  sin configurar todavía: lo harás en http://localhost:4477 al arrancar"
+fi
 
 if command -v python3 >/dev/null 2>&1; then
   echo "· venv de Python (voz y navegador; se puede omitir con NO_PY=1)"
@@ -95,10 +96,11 @@ verde "✓ Lumi instalado en $DESTINO"
 cat <<EOF
 
 Siguiente:
-  1. edita config.json   (ownerIds = tu ID de Discord, appName...)
-  2. edita secret.json   (token del bot y webPassword del panel)
-  3. arranca:   node src/index.js
-     o solo web: LUMI_NO_DISCORD=1 node src/index.js
+  1. arranca:   node src/index.js
+  2. abre http://localhost:4477 → el formulario pide PIN, token de Discord, tu ID y nombre
+     (si no usas Discord, arranca con LUMI_NO_DISCORD=1)
+  3. para que el chat funcione, ten una clave de modelo:
+     ~/.pi/agent/auth.json  o  export DEEPSEEK_API_KEY=...
 
 Servicio systemd:
   sudo sed "s|%i|$USER|g; s|/home/$USER/lumi|$DESTINO|" deploy/lumi.service \

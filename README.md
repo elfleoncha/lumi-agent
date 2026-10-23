@@ -192,12 +192,15 @@ Incluye `Dockerfile` y `docker-compose.yml` (panel, ffmpeg, venv y Chromium dent
 
 ```bash
 cp .env.example .env        # pon DEEPSEEK_API_KEY (o la de tu proveedor)
-docker compose up -d
+docker compose up -d        # y abre http://localhost:4477 para el formulario
 
 # con navegador en vivo (Chromium incluido en la imagen):
 docker compose --profile navegador up -d
 docker compose logs -f
 ```
+
+La configuración se guarda en `./data/` (volumen montado), así que sobrevive a
+`docker compose down` y a las actualizaciones de la imagen.
 
 Las credenciales van por **variable de entorno**, no montando `~/.pi`: dentro de
 un contenedor limpio el SDK no siempre encuentra el `auth.json` (probado, es lo

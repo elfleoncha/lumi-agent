@@ -101,24 +101,22 @@ export DEEPSEEK_API_KEY=sk-...
 
 ```bash
 git clone https://github.com/elfleoncha/lumi-agent.git
-cd lumi
-./install.sh          # deps, config/secret and a self-signed certificate
+cd lumi-agent
+./install.sh          # deps + self-signed certificate (+ Chromium)
+node src/index.js     # then open http://localhost:4477: the form asks for everything
 ```
 
 Or by hand:
 
 ```bash
 npm install
-cp config.example.json config.json
-cp secret.example.json secret.json   # your token and PIN go in there
-# edit config.json: ownerIds (your Discord ID), appName, ports...
-
 npm start                     # with Discord
 LUMI_NO_DISCORD=1 npm start   # web panel only
 ```
 
-Open `http://localhost:4477`. On the very first run Lumi shows a **setup form**
-(PIN, Discord token, owner ID, name) and writes the config for you.
+On the very first run Lumi shows a **setup form** (PIN, Discord token, owner ID,
+name) at `http://localhost:4477` and writes the config for you, then restarts.
+You can also copy `config.example.json` and `secret.example.json` instead.
 
 The installer also creates a self-signed certificate in `certs/`, so
 `https://localhost:4478` works for the microphone and the PWA.
@@ -202,12 +200,15 @@ The previous conversation is not lost: it stays as plain text you can re-read.
 
 ```bash
 cp .env.example .env        # put DEEPSEEK_API_KEY (or your provider's)
-docker compose up -d
+docker compose up -d        # then open http://localhost:4477 for the form
 
 # with the live browser (Chromium is baked into the image):
 docker compose --profile navegador up -d
 docker compose logs -f
 ```
+
+Configuration is stored in `./data/` (mounted volume), so it survives
+`docker compose down` and image upgrades.
 
 ## Tests
 
