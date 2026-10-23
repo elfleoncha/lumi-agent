@@ -1,6 +1,7 @@
 import express from "express";
 import fs from "node:fs";
 import path from "node:path";
+import { spawn } from "node:child_process";
 
 /**
  * Asistente de primer arranque.
@@ -12,6 +13,43 @@ import path from "node:path";
  *
  * Es lo que hace que `docker compose up` no necesite editar JSON a mano.
  */
+/** ¿Hay algo que nos vuelva a arrancar? (systemd, PM2 o Docker) */
+function bajoSupervisor() {
+  if (process.env.INVOCATION_ID) return true; // systemd
+  // `pm_id` solo lo pone PM2 al proceso que gestiona (PM2_HOME se hereda y engaña)
+  if (process.env.pm_id) return true;
+  try {
+    if (fs.existsSync("/.dockerenv")) return true;
+    if (fs.readFileSync("/proc/1/cgroup", "utf8").includes("docker")) return true;
+  } catch {}
+  return false;
+}
+
+/**
+ * Tras guardar hay que arrancar ya configurado.
+ * Si nos supervisa alguien, basta con salir: systemd/PM2/Docker reinician.
+ * Si no (típico `node src/index.js` en una terminal), nos relanzamos nosotros,
+ * porque si no el proceso muere y el panel se queda caído.
+ */
+function reiniciar() {
+  if (bajoSupervisor()) {
+    process.exit(0);
+  }
+  try {
+    const hijo = spawn(process.execPath, process.argv.slice(1), {
+      detached: true,
+      stdio: "inherit",
+      cwd: process.cwd(),
+      env: process.env,
+    });
+    hijo.unref();
+    console.log(new Date().toISOString(), "asistente: relanzando Lumi ya configurado");
+  } catch (e) {
+    console.error("No pude relanzar solo. Arranca a mano: node src/index.js");
+  }
+  process.exit(0);
+}
+
 export function startWizard({ port = 4477, host = "0.0.0.0", dirs, log }) {
   const app = express();
   app.use(express.json({ limit: "1mb" }));
@@ -68,9 +106,9 @@ export function startWizard({ port = 4477, host = "0.0.0.0", dirs, log }) {
         );
       }
       guardado = true;
-      res.json({ ok: true });
+      res.json({ ok: true, reinicio: bajoSupervisor() ? "supervisor" : "propio" });
       log?.("asistente: configuración guardada, reiniciando…");
-      setTimeout(() => process.exit(0), 800);
+      setTimeout(() => reiniciar(), 800);
     } catch (e) {
       res.status(500).json({ error: String(e?.message ?? e) });
     }
@@ -142,7 +180,7 @@ const TEXTOS = {
     ownerAyuda: "(opcional, para que solo te haga caso a ti)",
     nombre: "Nombre del asistente",
     guardar: "Guardar y arrancar",
-    ok: "Guardado. Reiniciando… recarga en unos segundos.",
+    ok: "Guardado. Arrancando Lumi… recarga en unos segundos.",
     malo: "Dirección no válida",
   },
   en: {

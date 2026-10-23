@@ -517,7 +517,7 @@ async function arrancar(c) {
     try {
       // Precarga la sesión del dueño para que /api/stats tenga datos desde el
       // primer segundo (antes, tras cada reinicio, el panel salía vacío).
-      const ownerKey = `dm-${cfg.ownerIds[0]}`;
+      const ownerKey = cfg.ownerKey;
       try {
         const s = await pool.ensure(ownerKey);
         log(`sesión principal precargada: ${s.state?.messages?.length ?? 0} mensajes`);

@@ -135,6 +135,11 @@ const DICT = {
     "Servidor caído": "Server down",
     "Reintentando…": "Retrying…",
 
+    "guardando…": "saving…",
+    "Guardando…": "Saving…",
+    "guardado. Reinicia el bot para aplicarlo.": "saved. Restart the bot to apply it.",
+    "Guardado": "Saved",
+
     // ---- avisos y errores del panel
     "Hola. Aquí estoy, desde el navegador.": "Hi. I'm here, from the browser.",
     "Se cortó la conexión": "Connection dropped",

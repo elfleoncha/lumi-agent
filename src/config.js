@@ -71,6 +71,9 @@ export function loadConfig() {
   if (env.LUMI_OWNER_IDS) {
     cfg.ownerIds = env.LUMI_OWNER_IDS.split(",").map((x) => x.trim()).filter(Boolean);
   }
+  // Clave de la conversación principal. Sin dueño (modo solo web) usamos
+  // "local": antes salía "dm-undefined" y al añadir el ID la sesión se perdía.
+  cfg.ownerKey = cfg.ownerIds?.[0] ? `dm-${cfg.ownerIds[0]}` : "dm-local";
   return cfg;
 }
 

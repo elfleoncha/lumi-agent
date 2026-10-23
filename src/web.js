@@ -186,7 +186,7 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
     res.json({ token: issueToken() });
   });
 
-  const ownerKey = `dm-${cfg.ownerIds[0]}`;
+  const ownerKey = cfg.ownerKey;
 
   // --- estado / estadísticas ---
   app.get("/api/stats", auth, async (req, res) => {

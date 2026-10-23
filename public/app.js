@@ -1461,14 +1461,33 @@ $("settingsForm")?.addEventListener("submit", async (e) => {
     browser: { port: num(form.elements["browser.port"].value) },
   };
 
-  $("setHint").textContent = "guardando…";
+  const pista = $("setHint");
+  const decir = (texto, malo = false) => {
+    pista.textContent = texto;
+    pista.classList.toggle("set__hint--error", malo);
+    // el aviso vive al final de la hoja: lo traemos a la vista
+    pista.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  };
+
+  const botonGuardar = $("settingsForm")?.querySelector('button[type="submit"]');
+  const textoBoton = botonGuardar?.textContent;
+  if (botonGuardar) botonGuardar.textContent = t("Guardando…");
+  decir(t("guardando…"));
   try {
     const res = await api("/api/settings", { method: "POST", body: JSON.stringify(body) });
     const d = await res.json();
     if (!res.ok) throw new Error(d.error || "error");
-    $("setHint").textContent = "✓ guardado. Reinicia el bot para aplicar (pm2 restart valen-bot).";
+    decir("✓ " + t("guardado. Reinicia el bot para aplicarlo."));
+    setTimeout(() => {
+      // fuera de la hoja salvo que haya un error, para que se note que se ha guardado
+      if (!pista.classList.contains("set__hint--error")) {
+        document.getElementById("settingsSheet").hidden = true;
+      }
+    }, 1400);
   } catch (err) {
-    $("setHint").textContent = "⚠ " + err.message;
+    decir("⚠ " + err.message, true);
+  } finally {
+    if (botonGuardar) botonGuardar.textContent = textoBoton;
   }
 });
 
