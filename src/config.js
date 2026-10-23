@@ -33,12 +33,45 @@ export function loadConfig() {
   if (fs.existsSync(secretPath)) {
     secret = JSON.parse(fs.readFileSync(secretPath, "utf8"));
   }
-  return {
+  const cfg = {
     ...DEFAULTS,
     ...base,
     ...secret,
     token: secret.token || process.env.DISCORD_TOKEN,
   };
+
+  // Variables de entorno: lo que documenta .env.example tiene que funcionar de
+  // verdad (en Docker es la única forma cómoda de configurarlo).
+  const env = process.env;
+  const num = (v) => (v === undefined || v === "" ? undefined : Number(v));
+  const textos = {
+    LUMI_NAME: "appName",
+    LUMI_TAGLINE: "appTagline",
+    LUMI_SESSION_DIR: "sessionDir",
+    LUMI_AGENT_CWD: "agentCwd",
+    WEB_PASSWORD: "webPassword",
+    LUMI_MODEL: "model",
+    LUMI_THINKING: "thinkingLevel",
+    NTFY_TOPIC: "ntfyTopic",
+    LUMI_CAST_DEVICE: "castDevice",
+  };
+  for (const [variable, clave] of Object.entries(textos)) {
+    if (env[variable]) cfg[clave] = env[variable];
+  }
+  const numeros = {
+    WEB_PORT: "webPort",
+    WEB_PORT_HTTPS: "webPortHttps",
+    LUMI_BROWSER_PORT: "browserPort",
+    LUMI_SESSION_MAX_MB: "sessionMaxMb",
+  };
+  for (const [variable, clave] of Object.entries(numeros)) {
+    const valor = num(env[variable]);
+    if (valor !== undefined && !Number.isNaN(valor)) cfg[clave] = valor;
+  }
+  if (env.LUMI_OWNER_IDS) {
+    cfg.ownerIds = env.LUMI_OWNER_IDS.split(",").map((x) => x.trim()).filter(Boolean);
+  }
+  return cfg;
 }
 
 export function ensureDirs(cfg) {
