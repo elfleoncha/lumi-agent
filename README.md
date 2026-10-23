@@ -66,12 +66,36 @@ No es un SaaS ni multiusuario: es *tu* asistente, en *tu* máquina.
 
 ## Instalación rápida
 
-Requisitos: **Node 20+**, una clave de API para el modelo (DeepSeek, Groq,
-OpenAI...) configurada en pi, y opcionalmente **ffmpeg** + Python para voz.
+Requisitos: **Node 20+** y una clave de API de un modelo. Opcionalmente
+**ffmpeg** + Python para voz y navegador.
+
+### 1. Configurar el modelo (lo primero)
+
+Lumi no trae claves: usa las de **pi**, el motor que lleva dentro. Se configuran
+una vez, en tu máquina:
 
 ```bash
-git clone https://github.com/<tu-usuario>/lumi.git
+npm i -g @earendil-works/pi-coding-agent   # o el instalador de pi que prefieras
+pi                                          # dentro, /login o /model para elegir proveedor
+cat ~/.pi/agent/auth.json                   # aquí quedan las credenciales
+```
+
+Lumi lee `~/.pi/agent/auth.json` al arrancar. Si no hay ninguna clave, el panel
+abre pero al escribir el primer mensaje verás un error del proveedor.
+Alternativa sin tocar `~/.pi`: exporta `DEEPSEEK_API_KEY` (o la del proveedor)
+en el entorno antes de arrancar.
+
+### 2. Instalar Lumi
+
+```bash
+git clone https://github.com/elfleoncha/lumi.git
 cd lumi
+./install.sh          # instala deps, crea config/secret y un certificado propio
+```
+
+O a mano:
+
+```bash
 npm install
 
 cp config.example.json config.json
@@ -83,8 +107,20 @@ LUMI_NO_DISCORD=1 npm start   # solo panel web
 ```
 
 Abre `http://localhost:4477` y entra con el `webPassword` de `secret.json`.
+El instalador también genera un certificado autofirmado en `certs/`, así que
+`https://localhost:4478` funciona para el micrófono y la PWA.
 
-Con `install.sh` se genera además el servicio systemd:
+### 3. Arrancarlo siempre
+
+Con Docker (lo más cómodo):
+
+```bash
+cp config.example.json config.json && cp secret.example.json secret.json
+# edita los dos y luego:
+docker compose up -d
+```
+
+Con systemd:
 
 ```bash
 ./install.sh            # copia, crea .venv y deja listo el servicio
@@ -107,6 +143,8 @@ Todo vive en `config.json` y `secret.json` (ambos **fuera de git**).
 | `castDevice` / `castVoice` | Altavoz por defecto y voz de Cast |
 | `ntfyTopic` | Canal de push al móvil |
 | `appName` / `appTagline` | Marca que se ve en la web |
+| `sessionMaxMb` | A partir de cuántos MB se rota la conversación (18 por defecto, `0` lo apaga) |
+| `sessionCheckMinutes` | Cada cuánto se revisa el tamaño (10 min) |
 
 `secret.json`: `token` (bot de Discord) y `webPassword` (PIN del panel).
 
@@ -129,6 +167,36 @@ En Discord y en la terminal `lumi`:
 |---|---|
 | ![Resumen](docs/img/dashboard.png) | ![Ajustes](docs/img/ajustes.png) |
 | ![Móvil](docs/img/movil.png) | ![Terminal](docs/img/terminal.png) |
+
+## Sesiones largas (por qué se rotan solas)
+
+Compactar el contexto **añade** entradas al JSONL, nunca borra: el fichero solo
+crece. Con 30-40 MB el modelo tiene que releerlo entero en cada turno y todo
+parece colgado. Por eso Lumi vigila el tamaño cada 10 minutos y, si pasa de
+`sessionMaxMb`, archiva el fichero en `sessions/_archivo/`, guarda un volcado
+legible en `backups/` y sigue con una conversación limpia **sin reiniciar**.
+
+La conversación anterior no se pierde: queda en texto plano y puedes releerla.
+
+## Docker
+
+Incluye `Dockerfile` y `docker-compose.yml` (panel, ffmpeg y venv dentro).
+Monta `./config.json`, `./secret.json` y `~/.pi` (credenciales del modelo).
+
+```bash
+docker compose up -d
+docker compose logs -f
+```
+
+## Pruebas
+
+```bash
+npm run lint            # sintaxis de los ficheros principales
+npm run check:secrets   # nada personal en el repo
+./scripts/smoke-test.sh # arranca en un puerto libre y comprueba salud, login y auth
+```
+
+GitHub Actions ejecuta las tres en cada push (Node 20 y 22).
 
 ## Seguridad (leer antes de exponerlo)
 

@@ -24,9 +24,12 @@ const DEFAULTS = {
 
 /** Lee config.json y secret.json (secret tiene prioridad y está chmod 600). */
 export function loadConfig() {
-  const base = JSON.parse(fs.readFileSync(path.join(ROOT, "config.json"), "utf8"));
+  // Rutas configurables: útil para probar con una config temporal sin tocar la
+  // de verdad (LUMI_CONFIG / LUMI_SECRET).
+  const configPath = process.env.LUMI_CONFIG || path.join(ROOT, "config.json");
+  const secretPath = process.env.LUMI_SECRET || path.join(ROOT, "secret.json");
+  const base = JSON.parse(fs.readFileSync(configPath, "utf8"));
   let secret = {};
-  const secretPath = path.join(ROOT, "secret.json");
   if (fs.existsSync(secretPath)) {
     secret = JSON.parse(fs.readFileSync(secretPath, "utf8"));
   }

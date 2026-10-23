@@ -1,0 +1,41 @@
+# Lumi con docker compose
+#
+#   1. cp config.example.json config.json && cp secret.example.json secret.json
+#   2. edita los dos (tu ID de Discord, token, PIN, appName)
+#   3. docker compose up -d
+#
+# El panel queda en http://localhost:4477 (y https en 4478 si tienes
+# certificados en ./certs-tls o ./certs).
+services:
+  lumi:
+    build: .
+    container_name: lumi
+    restart: unless-stopped
+    ports:
+      - "4477:4477"   # panel (http)
+      - "4478:4478"   # panel (https), si hay certificados
+    volumes:
+      - ./config.json:/app/config.json:ro
+      - ./secret.json:/app/secret.json:ro
+      # credenciales del modelo (pi): auth.json y compañía
+      - ${HOME}/.pi:/root/.pi
+      # datos: conversaciones, medios, ficheros servidos y ajustes
+      - lumi-sessions:/app/sessions
+      - lumi-media:/app/media
+      - lumi-uploads:/app/uploads
+      - lumi-files:/app/public/files
+      - ./certs-tls:/app/certs-tls:ro
+      - ./certs:/app/certs:ro
+    environment:
+      TZ: Europe/Madrid
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  lumi-sessions:
+  lumi-media:
+  lumi-uploads:
+  lumi-files:

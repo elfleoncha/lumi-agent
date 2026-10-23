@@ -15,5 +15,7 @@
   "castVoice": "es-ES-AlvaroNeural",
   "ntfyTopic": "",
   "appName": "Lumi",
-  "appTagline": "Tu asistente personal, en casa y en tu bolsillo"
+  "appTagline": "Tu asistente personal, en casa y en tu bolsillo",
+  "sessionMaxMb": 18,
+  "sessionCheckMinutes": 10
 }

@@ -55,6 +55,23 @@ if command -v python3 >/dev/null 2>&1; then
   fi
 fi
 
+echo "· certificado HTTPS"
+if ls certs-tls/cert.pem certs/cert.pem >/dev/null 2>&1; then
+  echo "  ya hay un certificado, no toco nada"
+elif command -v openssl >/dev/null 2>&1; then
+  IP_LOCAL=$(hostname -I 2>/dev/null | awk '{print $1}')
+  mkdir -p certs
+  openssl req -x509 -newkey rsa:2048 -nodes -days 825 \
+    -keyout certs/key.pem -out certs/cert.pem \
+    -subj "/CN=lumi" \
+    -addext "subjectAltName=DNS:localhost,IP:127.0.0.1${IP_LOCAL:+,IP:$IP_LOCAL}" >/dev/null 2>&1 \
+    && chmod 600 certs/key.pem \
+    && echo "  autofirmado creado en certs/ (válido para localhost y ${IP_LOCAL:-tu IP})" \
+    || aviso "  no pude crear el certificado"
+else
+  aviso "  sin openssl: el panel irá solo por HTTP (el micrófono necesita HTTPS)"
+fi
+
 mkdir -p sessions uploads public/files
 
 verde "✓ Lumi instalado en $DESTINO"

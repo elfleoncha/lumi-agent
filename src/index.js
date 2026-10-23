@@ -59,6 +59,9 @@ const client = new Client({
 });
 
 const pool = new SessionPool(cfg, log);
+if (Number(cfg.sessionMaxMb ?? 18) > 0) {
+  log(`rotación de sesión: al pasar de ${cfg.sessionMaxMb ?? 18} MB (cada ${cfg.sessionCheckMinutes ?? 10} min)`);
+}
 const MAX = 1900;
 
 function chunkText(text) {

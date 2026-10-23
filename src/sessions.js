@@ -36,6 +36,93 @@ export class SessionPool {
     this.idleMs = 30 * 60 * 1000;
     this.timer = setInterval(() => this.sweep(), 5 * 60 * 1000);
     this.timer.unref?.();
+
+    // Rotación automática de sesiones. Compactar AÑADE entradas al JSONL (nunca
+    // borra), así que el fichero engorda hasta que el modelo tiene que releer
+    // 36 MB por turno y todo parece colgado. Aquí se archiva solo, sin reiniciar
+    // el proceso, cuando el fichero pasa del umbral y la sesión está inactiva.
+    this.rotateMb = Number(cfg.sessionMaxMb ?? 18);
+    this.rotateEveryMs = Number(cfg.sessionCheckMinutes ?? 10) * 60 * 1000;
+    if (this.rotateMb > 0) {
+      this.timerRot = setInterval(() => this.quizasRotar(), this.rotateEveryMs);
+      this.timerRot.unref?.();
+    }
+  }
+
+  /** Archiva el fichero de una conversación y deja que se cree uno limpio. */
+  async rotar(key, motivo) {
+    const real = this.sessions.get(key)?.file ?? this.sessionPathFor(key);
+    if (!real || !fs.existsSync(real)) return false;
+    const archivoDir = path.join(this.cfg.sessionDir, "_archivo");
+    fs.mkdirSync(archivoDir, { recursive: true });
+    const sello = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    const destino = path.join(archivoDir, `${path.basename(real, ".jsonl")}-${sello}.jsonl`);
+
+    // Volcado legible antes de mover: la conversación nunca se pierde.
+    try {
+      const texto = this.#volcar(real);
+      const dirVolcados = this.cfg.backupsDir ?? path.join(this.cfg.sessionDir, "..", "backups");
+      fs.mkdirSync(dirVolcados, { recursive: true });
+      fs.writeFileSync(path.join(dirVolcados, `conversacion-${sello}.txt`), texto, { mode: 0o600 });
+    } catch (e) {
+      this.log?.(`rotación: no pude volcar a texto (${e?.message})`);
+    }
+
+    await this.dispose(key);
+    try {
+      fs.renameSync(real, destino);
+    } catch (e) {
+      this.log?.(`rotación: no pude archivar (${e?.message})`);
+      return false;
+    }
+    // El enlace apunta al fichero archivado: se suelta para empezar de cero.
+    delete this.links[key];
+    this.#saveLinks();
+    this.log?.(`sesión rotada (${motivo}): ${path.basename(destino)}`);
+    return true;
+  }
+
+  /** Texto plano legible de una sesión, para poder releerla sin el JSONL. */
+  #volcar(fichero) {
+    const lineas = fs.readFileSync(fichero, "utf8").split("\n");
+    const salida = [];
+    for (const linea of lineas) {
+      if (!linea) continue;
+      let e;
+      try {
+        e = JSON.parse(linea);
+      } catch {
+        continue;
+      }
+      if (e.type !== "message") continue;
+      const m = e.message ?? {};
+      if (m.role !== "user" && m.role !== "assistant") continue;
+      const c = m.content;
+      const texto = typeof c === "string"
+        ? c
+        : Array.isArray(c)
+          ? c.filter((x) => x?.type === "text").map((x) => x.text).join("")
+          : "";
+      if (!texto.trim()) continue;
+      salida.push(`[${m.role}] ${texto}\n`);
+    }
+    return salida.join("\n");
+  }
+
+  /** Revisa los ficheros de las sesiones vivas y rota los que se han hinchado. */
+  async quizasRotar() {
+    for (const [key, entrada] of this.sessions) {
+      if (this.ocupado.has(key)) continue; // hay un turno en marcha
+      const f = entrada.file;
+      let st;
+      try {
+        st = fs.statSync(f);
+      } catch {
+        continue;
+      }
+      if (st.size < this.rotateMb * 1024 * 1024) continue;
+      await this.rotar(key, `${(st.size / 1048576).toFixed(1)} MB`);
+    }
   }
 
   #loadLinks() {
