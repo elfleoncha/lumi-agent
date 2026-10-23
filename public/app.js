@@ -1,4 +1,4 @@
-import { t, aplicar, ponerIdioma, idiomaActual, IDIOMAS } from "/i18n.js";
+import { t, aplicar, ponerIdioma, idiomaActual, IDIOMAS } from "/i18n.js?v=2";
 
 const $ = (id) => document.getElementById(id);
 const TOKEN_KEY = "valen.token";
@@ -518,6 +518,20 @@ $("newBtn").addEventListener("click", async () => {
   addMsg("assistant", "Contexto limpio. ¿Por dónde vamos?");
   refreshStats();
 });
+
+/* ---------------- rescate de caché vieja ---------------- */
+/* Si el service worker sirvió una versión rancia, la app se queda en blanco.
+   Tras 8 s sin nada pintado recargamos una sola vez (con query para saltar caché). */
+setTimeout(() => {
+  const hay = document.querySelector("#msgs .msg");
+  const enLogin = !$("login")?.classList.contains("hidden");
+  if (hay || enLogin) return;
+  if (sessionStorage.getItem("lumi.rescate")) return;
+  sessionStorage.setItem("lumi.rescate", "1");
+  const url = new URL(location.href);
+  url.searchParams.set("r", Date.now());
+  location.replace(url.toString());
+}, 8000);
 
 /* ---------------- idioma ---------------- */
 (() => {

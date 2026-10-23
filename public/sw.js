@@ -1,5 +1,5 @@
 /* Lumi — service worker mínimo: shell offline, API siempre a la red */
-const CACHE = "minivalen-v1";
+const CACHE = "minivalen-v2";
 const SHELL = ["/manifest.webmanifest", "/icons/icon-192.png"];
 
 self.addEventListener("install", (e) => {
