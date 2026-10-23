@@ -95,7 +95,7 @@ export DEEPSEEK_API_KEY=sk-...
 ### 2. Instalar Lumi
 
 ```bash
-git clone https://github.com/elfleoncha/lumi.git
+git clone https://github.com/elfleoncha/lumi-agent.git
 cd lumi
 ./install.sh          # instala deps, crea config/secret y un certificado propio
 ```
