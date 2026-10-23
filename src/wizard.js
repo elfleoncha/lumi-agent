@@ -92,6 +92,9 @@ export function startWizard({ port = 4477, host = "0.0.0.0", configPath, secretP
     };
 
     try {
+      // la carpeta puede no existir (p. ej. LUMI_CONFIG=/ruta/nueva/config.json)
+      fs.mkdirSync(path.dirname(configPath), { recursive: true });
+      fs.mkdirSync(path.dirname(secretPath), { recursive: true });
       fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n", { mode: 0o600 });
       fs.writeFileSync(
         secretPath,
