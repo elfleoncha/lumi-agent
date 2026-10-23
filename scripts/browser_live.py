@@ -416,9 +416,13 @@ async def on_startup(app):
     perfil = os.environ.get("LUMI_BROWSER_PROFILE", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".browser-profile"))
     os.makedirs(perfil, exist_ok=True)
     # perfil persistente: guarda cookies/sesión (menos captchas y no reaceptar cookies)
+    # En contenedor (root) Chromium no arranca sin --no-sandbox.
+    # BROWSER_LIVE_NO_SANDBOX=1 lo activa; fuera de Docker no hace falta.
+    args = ["--no-sandbox", "--disable-dev-shm-usage"] if os.environ.get("BROWSER_LIVE_NO_SANDBOX") == "1" else []
     ctx = await pw.chromium.launch_persistent_context(
         perfil,
         headless=True,
+        args=args,
         viewport={"width": VIEW_W, "height": VIEW_H},
         locale="es-ES",
         user_agent=(

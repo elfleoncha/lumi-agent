@@ -63,6 +63,7 @@ No es un SaaS ni multiusuario: es *tu* asistente, en *tu* máquina.
 **Extras**
 - **Navegador en vivo**: Chromium persistente con pantalla en vivo embebida en el
   panel y control por API (goto, click, fill, text...). Protegido con token.
+  `install.sh` instala Chromium y deja lista la unidad `lumi-browser`.
 - **Terminal propia**: `lumi` (sin dependencias), `lumi ask "..."`, `lumi status`.
 - APK Android opcional (WebView) para tenerlo como app.
 
@@ -187,11 +188,14 @@ La conversación anterior no se pierde: queda en texto plano y puedes releerla.
 
 ## Docker
 
-Incluye `Dockerfile` y `docker-compose.yml` (panel, ffmpeg y venv dentro).
+Incluye `Dockerfile` y `docker-compose.yml` (panel, ffmpeg, venv y Chromium dentro).
 
 ```bash
 cp .env.example .env        # pon DEEPSEEK_API_KEY (o la de tu proveedor)
 docker compose up -d
+
+# con navegador en vivo (Chromium incluido en la imagen):
+docker compose --profile navegador up -d
 docker compose logs -f
 ```
 

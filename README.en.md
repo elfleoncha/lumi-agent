@@ -198,11 +198,14 @@ The previous conversation is not lost: it stays as plain text you can re-read.
 
 ## Docker
 
-`Dockerfile` and `docker-compose.yml` included (panel, ffmpeg and venv inside).
+`Dockerfile` and `docker-compose.yml` included (panel, ffmpeg, venv and Chromium inside).
 
 ```bash
 cp .env.example .env        # put DEEPSEEK_API_KEY (or your provider's)
 docker compose up -d
+
+# with the live browser (Chromium is baked into the image):
+docker compose --profile navegador up -d
 docker compose logs -f
 ```
 

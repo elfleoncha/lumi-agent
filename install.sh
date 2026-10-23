@@ -56,6 +56,19 @@ if command -v python3 >/dev/null 2>&1; then
     ./.venv/bin/pip install --quiet --upgrade pip
     ./.venv/bin/pip install --quiet -r requirements.txt || aviso "  algunas dependencias de Python fallaron (voz/navegador no estarán)"
     command -v ffmpeg >/dev/null 2>&1 || aviso "  falta ffmpeg (necesario para transcribir y convertir audio)"
+
+    # Chromium para el navegador en vivo (~150 MB). Se puede omitir con NO_NAVEGADOR=1.
+    if [ "${NO_NAVEGADOR:-0}" != "1" ]; then
+      echo "· navegador en vivo (descarga Chromium, ~150 MB)"
+      if ./.venv/bin/playwright install chromium >/dev/null 2>&1; then
+        verde "  chromium instalado"
+        # Dependencias de sistema: solo tienen sentido con sudo; avisamos.
+        ./.venv/bin/playwright install-deps chromium >/dev/null 2>&1 \
+          || aviso "  si Chromium no arranca: sudo ./.venv/bin/playwright install-deps chromium"
+      else
+        aviso "  no pude instalar Chromium (el panel funcionará sin navegador en vivo)"
+      fi
+    fi
   fi
 fi
 
@@ -88,8 +101,13 @@ Siguiente:
      o solo web: LUMI_NO_DISCORD=1 node src/index.js
 
 Servicio systemd:
-  sudo sed "s|%i|$USER|g; s|/home/$USER/lumi|$DESTINO|" deploy/lumi.service > /etc/systemd/system/lumi.service
-  sudo systemctl daemon-reload && sudo systemctl enable --now lumi
+  sudo sed "s|%i|$USER|g; s|/home/$USER/lumi|$DESTINO|" deploy/lumi.service \
+    > /etc/systemd/system/lumi.service
+  sudo sed "s|%i|$USER|g; s|/home/$USER/lumi|$DESTINO|" deploy/lumi-browser.service \
+    > /etc/systemd/system/lumi-browser.service
+  sudo systemctl daemon-reload
+  sudo systemctl enable --now lumi lumi-browser
+  # sin navegador en vivo, solo: sudo systemctl enable --now lumi
 
 Panel: http://localhost:4477  (con el webPassword de secret.json)
 EOF

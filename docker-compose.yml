@@ -15,7 +15,9 @@ services:
       - "4477:4477"   # panel (http)
       - "4478:4478"   # panel (https), si hay certificados
     env_file:
-      - .env            # DEEPSEEK_API_KEY / OPENAI_API_KEY / DISCORD_TOKEN...
+      # Copia .env.example a .env y pon ahí DEEPSEEK_API_KEY (o la de tu proveedor)
+      - path: .env
+        required: false
     volumes:
       - ./config.json:/app/config.json:ro
       - ./secret.json:/app/secret.json:ro
@@ -37,7 +39,31 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # Navegador en vivo (opcional):  docker compose --profile navegador up -d
+  lumi-browser:
+    build: .
+    image: lumi-agent
+    container_name: lumi-browser
+    restart: unless-stopped
+    profiles: ["navegador"]
+    command: ["/app/.venv/bin/python", "scripts/browser_live.py"]
+    ports:
+      - "4479:4479"
+      - "4480:4480"
+    environment:
+      BROWSER_LIVE_PORT: 4479
+      BROWSER_LIVE_HTTPS_PORT: 4480
+      BROWSER_LIVE_START: http://lumi:4477/
+      BROWSER_LIVE_NO_SANDBOX: "1"
+    volumes:
+      - ./config.json:/app/config.json:ro
+      - ./secret.json:/app/secret.json:ro
+      - lumi-browser-profile:/app/.browser-profile
+      - ./certs-tls:/app/certs-tls:ro
+      - ./certs:/app/certs:ro
+
 volumes:
+  lumi-browser-profile:
   lumi-sessions:
   lumi-media:
   lumi-uploads:

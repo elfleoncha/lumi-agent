@@ -29,6 +29,13 @@ RUN python3 -m venv .venv \
  && ./.venv/bin/pip install --no-cache-dir --quiet --upgrade pip \
  && ./.venv/bin/pip install --no-cache-dir --quiet -r requirements.txt
 
+# Chromium para el navegador en vivo (opcional; súbelo con NAVEGADOR=0 para una
+# imagen ~150 MB más ligera, pero entonces el navegador en vivo no arranca).
+ARG NAVEGADOR=1
+RUN if [ "$NAVEGADOR" = "1" ]; then \
+      ./.venv/bin/playwright install --with-deps chromium ; \
+    fi
+
 COPY src ./src
 COPY public ./public
 COPY bin ./bin

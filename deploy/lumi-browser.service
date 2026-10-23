@@ -1,0 +1,32 @@
+# Navegador en vivo (Chromium con pantalla en vivo para el panel).
+#   sudo cp deploy/lumi-browser.service /etc/systemd/system/lumi-browser.service
+#   sudo systemctl daemon-reload && sudo systemctl enable --now lumi-browser
+#
+# Sustituye %i por tu usuario y ajusta la ruta si no está en /home/%i/lumi.
+# El token de acceso lo valida contra secret.json del proyecto (caduca a diario).
+[Unit]
+Description=Lumi · navegador en vivo (Chromium)
+After=network-online.target lumi.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=%i
+WorkingDirectory=/home/%i/lumi
+Environment=BROWSER_LIVE_PORT=4479
+Environment=BROWSER_LIVE_HTTPS_PORT=4480
+Environment=BROWSER_LIVE_START=http://127.0.0.1:4477/
+ExecStart=/home/%i/lumi/.venv/bin/python scripts/browser_live.py
+Restart=on-failure
+RestartSec=5
+
+# Un Chromium dentro de un servicio: no necesita privilegios extra.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target
