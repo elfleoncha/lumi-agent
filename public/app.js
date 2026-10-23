@@ -151,7 +151,7 @@ async function loadHistory() {
     const { messages } = await res.json();
     $("msgs").innerHTML = "";
     if (!messages.length) {
-      addMsg("assistant", "Hola Leon. Aquí estoy, desde el navegador. 🤖");
+      addMsg("assistant", "Hola. Aquí estoy, desde el navegador.");
       return;
     }
     for (const m of messages) addMsg(m.role, m.text);
@@ -1008,7 +1008,7 @@ if (critter) {
   if (!bicho || !say) return;
 
   const frases = [
-    "hola Leon",
+    "hola",
     "¿qué hacemos?",
     "aquí sigo",
     "toca código",
@@ -1037,7 +1037,7 @@ if (critter) {
     { cls: "cafe", text: "☕ un cafecito", ms: 2200 },
     { cls: "cafe", text: "que me quemo", ms: 2200 },
     { cls: "cool", text: "modo guapo activado", ms: 2400 },
-    { cls: "amor", text: "te quiero, Leon", ms: 2600 },
+    { cls: "amor", text: "te quiero", ms: 2600 },
     { cls: "amor", text: "💜", ms: 2200 },
     { cls: "dormir", text: "zzz…", ms: 3800 },
     { cls: "dormir", text: "5 minutitos", ms: 3800 },

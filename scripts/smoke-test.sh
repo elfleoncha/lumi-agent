@@ -73,5 +73,22 @@ done
 [ "$CODIGO" = "429" ] || fallo "tras 6 intentos fallidos debería bloquear (429), fue $CODIGO"
 echo "  ✓ fuerza bruta bloqueada"
 
+# --- primer arranque: sin config debe salir el formulario, no un crash ---
+echo "· primer arranque (sin config)"
+TMP2="$(mktemp -d)"
+LUMI_CONFIG="$TMP2/config.json" LUMI_SECRET="$TMP2/secret.json" WEB_PORT=$((PUERTO + 1)) \
+  LUMI_NO_DISCORD=1 node src/index.js > "$TMP2/log" 2>&1 &
+PID2=$!
+for i in $(seq 1 30); do
+  sleep 0.5
+  curl -fsS "http://127.0.0.1:$((PUERTO + 1))/" >/dev/null 2>&1 && break
+  kill -0 "$PID2" 2>/dev/null || { echo "✗ el asistente de primer arranque murió"; tail -10 "$TMP2/log"; exit 1; }
+done
+curl -s "http://127.0.0.1:$((PUERTO + 1))/" | grep -q "primer arranque" \
+  || { echo "✗ no aparece el formulario de primer arranque"; exit 1; }
+kill "$PID2" 2>/dev/null; wait "$PID2" 2>/dev/null
+rm -rf "$TMP2"
+echo "  ✓ formulario de primer arranque"
+
 echo "✓ prueba de humo correcta"
 exit 0

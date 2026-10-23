@@ -19,10 +19,13 @@ import {
   cleanupOut,
 } from "./media.js";
 import { createWebServer } from "./web.js";
+import { startWizard } from "./wizard.js";
 import { CERTS_DIR, ROOT as ROOT_PROYECTO } from "./paths.js";
 import https from "node:https";
 import path from "node:path";
 import { readFileSync as readFileSyncFs, existsSync as existsSyncFs } from "node:fs";
+import fs from "node:fs";
+import os from "node:os";
 import {
   buildNativeCommands,
   discoverDynamicCommands,
@@ -32,20 +35,43 @@ import {
   PI_BUILTINS,
 } from "./commands.js";
 
+const LOG_FILE = process.env.LUMI_LOG_FILE || "";
+const log = (...a) => {
+  const linea = [new Date().toISOString(), ...a].join(" ");
+  console.log(linea);
+  if (LOG_FILE) {
+    try {
+      fs.appendFileSync(LOG_FILE, linea + "\n", { mode: 0o600 });
+    } catch {}
+  }
+};
+
+// Primer arranque: sin config.json no hay nada que hacer, así que en vez de
+// morir con un error se abre un formulario en el puerto del panel. Al guardar,
+// el proceso sale y systemd/PM2/Docker lo vuelve a levantar ya configurado.
+const RUTA_CONFIG = process.env.LUMI_CONFIG || path.join(ROOT_PROYECTO, "config.json");
+if (!fs.existsSync(RUTA_CONFIG)) {
+  startWizard({
+    port: Number(process.env.WEB_PORT) || 4477,
+    dirs: { root: path.dirname(RUTA_CONFIG), home: os.homedir() },
+    log,
+  });
+  // el asistente termina con process.exit(0)
+  await new Promise(() => {});
+}
+
 const cfg = loadConfig();
 ensureDirs(cfg);
 
-const log = (...a) => console.log(new Date().toISOString(), ...a);
-
 // Modo sólo-web: sin token de Discord (útil para pruebas y para quien quiera
 // usar Lumi únicamente desde el navegador).   LUMI_NO_DISCORD=1 npm start
-const SOLO_WEB = /^(1|true|si|sí|yes)$/i.test(process.env.LUMI_NO_DISCORD ?? "");
+let SOLO_WEB = /^(1|true|si|sí|yes)$/i.test(process.env.LUMI_NO_DISCORD ?? "");
 
 if (!cfg.token && !SOLO_WEB) {
-  console.error(
-    'Falta el token de Discord. Ponlo en secret.json ({"token":"..."}) o arranca en modo sólo-web con LUMI_NO_DISCORD=1',
-  );
-  process.exit(1);
+  // Sin token no se puede conectar a Discord, pero el panel sí funciona: mejor
+  // arrancar en modo sólo-web con un aviso claro que morir.
+  log("sin token de Discord en secret.json → arranco sólo el panel web");
+  SOLO_WEB = true;
 }
 
 const client = new Client({
