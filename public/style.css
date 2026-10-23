@@ -2043,3 +2043,29 @@ html, body { max-width: 100%; overflow-x: hidden; }
   border-radius: 6px;
 }
 .netbar__x:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
+
+/* --- selector de idioma --- */
+.idiomas {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin: 4px 0 2px;
+}
+.idiomas button {
+  min-width: 40px;
+  padding: 6px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+  background: transparent;
+  color: var(--fg-3, #8b8797);
+  font: 600 12px/1 inherit;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.idiomas button:hover { color: var(--fg); border-color: var(--accent); }
+.idiomas button[aria-pressed="true"] {
+  color: #0a0a0f;
+  background: var(--accent);
+  border-color: var(--accent);
+}

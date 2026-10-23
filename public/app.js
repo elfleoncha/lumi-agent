@@ -1,3 +1,5 @@
+import { t, aplicar, ponerIdioma, idiomaActual, IDIOMAS } from "/i18n.js";
+
 const $ = (id) => document.getElementById(id);
 const TOKEN_KEY = "valen.token";
 
@@ -161,7 +163,7 @@ async function loadHistory(force = false) {
     if (!force && messages.length < enPantalla && enPantalla > 0) return;
     $("msgs").innerHTML = "";
     if (!messages.length) {
-      addMsg("assistant", "Hola. Aquí estoy, desde el navegador.");
+      addMsg("assistant", t("Hola. Aquí estoy, desde el navegador."));
       return;
     }
     for (const m of messages) addMsg(m.role, m.text);
@@ -229,11 +231,11 @@ function modoCancelar() {
 async function cancelar() {
   modoEscribir();
   clearInterval(reanudando);
-  $("topSub").textContent = "Cancelando…";
+  $("topSub").textContent = t("Cancelando…");
   try {
     await api("/api/abort", { method: "POST" });
   } catch (e) {
-    $("topSub").textContent = "No pude cancelar";
+    $("topSub").textContent = t("No pude cancelar");
   }
   // Esperamos a que el servidor suelte el run antes de repintar el historial
   for (let i = 0; i < 20; i++) {
@@ -247,9 +249,9 @@ async function cancelar() {
   await loadHistory(true);
   scrollDown();
   refreshStats();
-  $("topSub").textContent = "Cancelado";
+  $("topSub").textContent = t("Cancelado");
   setTimeout(() => {
-    if (!busy && $("topSub").textContent === "Cancelado") $("topSub").textContent = "Conectado";
+    if (!busy && $("topSub").textContent === t("Cancelado")) $("topSub").textContent = t("Conectado");
   }, 2500);
 }
 
@@ -277,7 +279,7 @@ async function send(text, skipUserEcho = false) {
   // avisamos en vez de dejar el mensaje en cola sin explicación
   const st = await estadoServidor().catch(() => ({ busy: false }));
   if (st.busy) {
-    $("topSub").textContent = "En cola: esperando a que termine la respuesta anterior…";
+    $("topSub").textContent = t("En cola: esperando a que termine la respuesta anterior…");
   }
   body.classList.add("cursor");
 
@@ -348,7 +350,7 @@ async function send(text, skipUserEcho = false) {
     body.classList.remove("cursor");
     busy = false;
     modoEscribir();
-    $("topSub").textContent = "Conectado";
+    $("topSub").textContent = t("Conectado");
 
     // el móvil a veces corta el stream antes del "done": pedimos la verdad al servidor
     if (!gotDone) {
@@ -501,12 +503,28 @@ $("compactBtn").addEventListener("click", async () => {
 });
 
 $("newBtn").addEventListener("click", async () => {
-  if (!confirm("¿Empezar una conversación nueva? Se perderá el contexto actual.")) return;
+  if (!confirm(t("¿Empezar una conversación nueva? Se perderá el contexto actual."))) return;
   await api("/api/new", { method: "POST" });
   $("msgs").innerHTML = "";
   addMsg("assistant", "Contexto limpio. ¿Por dónde vamos?");
   refreshStats();
 });
+
+/* ---------------- idioma ---------------- */
+(() => {
+  const caja = $("idiomas");
+  if (!caja) return;
+  for (const { codigo, etiqueta } of IDIOMAS) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = etiqueta;
+    b.setAttribute("aria-pressed", String(codigo === idiomaActual()));
+    b.addEventListener("click", () => {
+      if (codigo !== idiomaActual()) ponerIdioma(codigo);
+    });
+    caja.appendChild(b);
+  }
+})();
 
 /* ---------------- estadísticas ---------------- */
 
@@ -557,7 +575,7 @@ async function refreshStats() {
     $("statusDot").className = "dot off";
     const causa = await diagnosticar();
     if (causa === "cert") {
-      $("topSub").textContent = "Certificado no válido";
+      $("topSub").textContent = t("Certificado no válido");
       aviso(
         "⚠️ <b>Certificado HTTPS no válido.</b> El navegador bloquea las peticiones y la web " +
         "parece desconectada aunque el bot esté vivo. Abre " +
@@ -565,10 +583,10 @@ async function refreshStats() {
         "para uso normal, o acepta el certificado. El micrófono solo funciona con HTTPS válido."
       );
     } else if (causa === "servidor-caido") {
-      $("topSub").textContent = "Servidor caído";
+      $("topSub").textContent = t("Servidor caído");
       aviso("⚠️ <b>El servidor no responde.</b> El bot puede estar reiniciándose. Se reconecta solo.");
     } else {
-      $("topSub").textContent = "Reintentando…";
+      $("topSub").textContent = t("Reintentando…");
       aviso("");
     }
   }
@@ -721,7 +739,7 @@ async function startRecording() {
     stream.getTracks().forEach((t) => t.stop());
     clearInterval(recTimer);
     $("micBtn").classList.remove("rec");
-    $("hint").innerHTML = `<kbd>Enter</kbd> envía · <kbd>Shift</kbd>+<kbd>Enter</kbd> salto de línea · pulsa el micro para dictar`;
+    $("hint").innerHTML = hintDefault();
     if (!recChunks.length) return;
 
     const blob = new Blob(recChunks, { type: mediaRecorder.mimeType || "audio/webm" });
@@ -776,7 +794,10 @@ async function sendAudio(blob) {
   }
 }
 
-const HINT_DEFAULT = `<kbd>Enter</kbd> envía · <kbd>Shift</kbd>+<kbd>Enter</kbd> salto de línea · pulsa el micro para dictar`;
+function hintDefault() {
+  return `<kbd>Enter</kbd> ${t("envía")} · <kbd>Shift</kbd>+<kbd>Enter</kbd> ${t("salto de línea · pulsa el micro para dictar")}`;
+}
+let HINT_DEFAULT = hintDefault();
 
 $("micBtn").addEventListener("click", () => {
   if (mediaRecorder && mediaRecorder.state === "recording") {
@@ -908,9 +929,9 @@ function renderOverview(data) {
   $("ov-messages").textContent = messages.toLocaleString("es-ES");
   $("ov-tokens").textContent = fmtTok(tokens);
   $("ov-days").textContent = activeDays;
-  $("ov-streak").textContent = current + (current === 1 ? " día" : " días");
-  $("ov-best").textContent = longest + (longest === 1 ? " día" : " días");
-  $("ov-peak").textContent = hasPeak ? `${pad2(peak)}:00 · ${hours[peak]} msg` : "—";
+  $("ov-streak").textContent = current + (current === 1 ? " " + t("día") : " " + t("días"));
+  $("ov-best").textContent = longest + (longest === 1 ? " " + t("día") : " " + t("días"));
+  $("ov-peak").textContent = hasPeak ? `${pad2(peak)}:00 · ${hours[peak]} ${t("msg")}` : "—";
   $("ov-cost").textContent = cost > 0 ? "$" + cost.toFixed(cost < 1 ? 4 : 2) : "—";
 
   const maxStreak = Math.max(longest, 1);
@@ -924,8 +945,8 @@ function renderOverview(data) {
   const diff = Math.abs(tokens - lotr);
   $("ov-foot").innerHTML =
     tokens >= lotr
-      ? `Has usado <b>${fmtTok(diff)}</b> tokens más que El Señor de los Anillos.`
-      : `Te faltan <b>${fmtTok(diff)}</b> tokens para igualar El Señor de los Anillos.`;
+      ? `${t("Has usado")} <b>${fmtTok(diff)}</b> ${t("tokens más que El Señor de los Anillos.")}`
+      : `${t("Te faltan")} <b>${fmtTok(diff)}</b> ${t("tokens para igualar El Señor de los Anillos.")}`;
 }
 
 function renderModels(data) {
@@ -959,7 +980,7 @@ async function refreshActivity(force = false) {
     else renderModels(d);
   } catch (e) {
     const f = $("ov-foot");
-    if (f) f.textContent = "No pude cargar la actividad: " + (e?.message ?? "error");
+    if (f) f.textContent = t("No pude cargar la actividad") + ": " + (e?.message ?? "error");
   }
 }
 
@@ -1517,7 +1538,7 @@ async function reanudarSiOcupado() {
   clearInterval(reanudando);
   const st = await estadoServidor();
   if (!st.busy) {
-    $("topSub").textContent = "Conectado";
+    $("topSub").textContent = t("Conectado");
     return;
   }
   // No estamos viendo el stream (app cerrada, pestaña en segundo plano, página
@@ -1529,7 +1550,7 @@ async function reanudarSiOcupado() {
   const startTime = Date.now();
   const marca = () => {
     const s = Math.floor(desde / 1000 + (Date.now() - startTime) / 1000);
-    $("topSub").textContent = `Escribiendo… ${s}s`;
+    $("topSub").textContent = `${t("Escribiendo")}… ${s}s`;
   };
   marca();
   reanudando = setInterval(async () => {
@@ -1542,7 +1563,7 @@ async function reanudarSiOcupado() {
       scrollDown();
       refreshStats();
       modoEscribir();
-      $("topSub").textContent = "Conectado";
+      $("topSub").textContent = t("Conectado");
     }
   }, 2500);
 }
@@ -1587,5 +1608,5 @@ async function sincronizar() {
   await loadHistory();
   scrollDown();
   refreshStats();
-  $("topSub").textContent = "Conectado";
+  $("topSub").textContent = t("Conectado");
 }

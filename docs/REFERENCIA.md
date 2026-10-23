@@ -113,3 +113,13 @@ certs/  certs-tls/                certificados (autofirmado / reales)
 .browser-profile/                 perfil de Chromium (cookies/sesiones)
 data/                             solo en Docker: config + sesiones
 ```
+
+## Idioma
+
+La interfaz está en **español e inglés**. Se detecta con `navigator.language` la
+primera vez y se cambia con el selector **ES / EN** del menú lateral (se guarda en
+`localStorage`). Los mensajes del servidor (login, subidas) usan `Accept-Language`.
+
+Para añadir un idioma: copia el bloque `en` de `public/i18n.js`, traduce los
+valores y añádelo a `IDIOMAS`. Las claves son el texto original en español, así
+que lo que no esté traducido se queda tal cual.

@@ -53,6 +53,7 @@ machine.
 - Settings from the web itself: branding, Discord, model, ports and HTTPS,
   voice, push.
 - Installable PWA.
+- **Spanish and English UI**: detected from the browser, switchable with the ES/EN selector in the sidebar.
 
 **Voice and home**
 - Speaks through Chromecast / Nest with edge-tts or gTTS, with lead-in sounds

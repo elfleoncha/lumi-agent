@@ -15,6 +15,7 @@ import {
   formatStats,
 } from "./commands.js";
 import { fileURLToPath } from "node:url";
+import { tr } from "./i18n.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -125,7 +126,7 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
     // rutas /api: los tokens en URLs acaban en logs, historiales e `Referer`.
     const t = h.startsWith("Bearer ") ? h.slice(7) : null;
     if (tokenValido(t)) return next();
-    res.status(401).json({ error: "no autorizado" });
+    res.status(401).json({ error: tr(req, "no autorizado") });
   }
 
   // --- freno de fuerza bruta en el login (por IP) --------------------------
@@ -161,13 +162,15 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
   app.post("/api/login", (req, res) => {
     const { password } = req.body ?? {};
     if (!cfg.webPassword) {
-      return res.status(500).json({ error: "falta webPassword en config.json" });
+      return res.status(500).json({ error: tr(req, "falta webPassword en config.json") });
     }
     const ip = req.ip ?? "?";
     const espera = loginBloqueado(ip);
     if (espera > 0) {
       res.set("Retry-After", String(Math.ceil(espera / 1000)));
-      return res.status(429).json({ error: `demasiados intentos, prueba en ${Math.ceil(espera / 60000)} min` });
+      return res.status(429).json({
+        error: tr(req, "demasiados intentos", { n: Math.ceil(espera / 60000) }),
+      });
     }
     const a = Buffer.from(String(password ?? ""));
     const b = Buffer.from(String(cfg.webPassword));
@@ -176,7 +179,7 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
       anotarFallo(ip);
       // Nunca loguear la contraseña ni un trozo: solo la longitud.
       log(`login web fallido desde ${ip} (${String(password ?? "").length} chars)`);
-      return res.status(401).json({ error: "contraseña incorrecta" });
+      return res.status(401).json({ error: tr(req, "contraseña incorrecta") });
     }
     intentos.delete(ip);
     res.set("Cache-Control", "no-store");
@@ -560,7 +563,7 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
           }),
         );
       }
-      res.status(400).json({ error: "prueba desconocida" });
+      res.status(400).json({ error: tr(req, "prueba desconocida") });
     } catch (e) {
       res.status(500).json({ error: String(e?.message ?? e) });
     }
@@ -842,7 +845,7 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
 
   // --- subir imagen → devuelve base64 listo para prompt ---
   app.post("/api/upload", auth, upload.single("image"), async (req, res) => {
-    if (!req.file) return res.status(400).json({ error: "sin imagen" });
+    if (!req.file) return res.status(400).json({ error: tr(req, "sin imagen") });
     try {
       const buf = fs.readFileSync(req.file.path);
       const mime = req.file.mimetype || "image/jpeg";

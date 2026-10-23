@@ -110,26 +110,68 @@ const PAGINA = `<!doctype html>
   .ok { margin-top:14px; color:#7ee0a1; font-size:13px }
 </style></head><body>
 <form class="caja" id="f">
-  <h1>Lumi · primer arranque</h1>
-  <p class="sub">Cuatro datos y listo. Puedes cambiarlo luego en Ajustes.</p>
+  <h1><span data-t="titulo">Lumi · primer arranque</span></h1>
+  <p class="sub" data-t="sub">Cuatro datos y listo. Puedes cambiarlo luego en Ajustes.</p>
 
-  <label>PIN del panel (mínimo 4)</label>
-  <input name="webPassword" type="password" autocomplete="new-password" required minlength="4" placeholder="algo que solo sepas tú">
+  <label data-t="pin">PIN del panel (mínimo 4)</label>
+  <input name="webPassword" type="password" autocomplete="new-password" required minlength="4" data-t-ph="pinPh" placeholder="algo que solo sepas tú">
 
-  <label>Token del bot de Discord <small>(opcional, si lo quieres en Discord)</small></label>
+  <label><span data-t="token">Token del bot de Discord</span> <small data-t="opcional">(opcional, si lo quieres en Discord)</small></label>
   <input name="token" placeholder="MTU2...">
 
-  <label>Tu ID de Discord <small>(opcional, para que solo te haga caso a ti)</small></label>
+  <label><span data-t="owner">Tu ID de Discord</span> <small data-t="ownerAyuda">(opcional, para que solo te haga caso a ti)</small></label>
   <input name="ownerIds" placeholder="123456789012345678">
 
-  <label>Nombre del asistente</label>
+  <label data-t="nombre">Nombre del asistente</label>
   <input name="appName" value="Lumi">
 
-  <button id="b" type="submit">Guardar y arrancar</button>
+  <button id="b" type="submit" data-t="guardar">Guardar y arrancar</button>
   <div class="err" id="e"></div>
   <div class="ok" id="ok"></div>
 </form>
 <script>
+const TEXTOS = {
+  es: {
+    titulo: "Lumi · primer arranque",
+    sub: "Cuatro datos y listo. Puedes cambiarlo luego en Ajustes.",
+    pin: "PIN del panel (mínimo 4)",
+    pinPh: "algo que solo sepas tú",
+    token: "Token del bot de Discord",
+    opcional: "(opcional, si lo quieres en Discord)",
+    owner: "Tu ID de Discord",
+    ownerAyuda: "(opcional, para que solo te haga caso a ti)",
+    nombre: "Nombre del asistente",
+    guardar: "Guardar y arrancar",
+    ok: "Guardado. Reiniciando… recarga en unos segundos.",
+    malo: "Dirección no válida",
+  },
+  en: {
+    titulo: "Lumi · first run",
+    sub: "Four fields and you're done. You can change it later in Settings.",
+    pin: "Panel PIN (at least 4 characters)",
+    pinPh: "something only you know",
+    token: "Discord bot token",
+    opcional: "(optional, if you want it on Discord)",
+    owner: "Your Discord ID",
+    ownerAyuda: "(optional, so it only answers to you)",
+    nombre: "Assistant name",
+    guardar: "Save and start",
+    ok: "Saved. Restarting… reload in a few seconds.",
+    malo: "Invalid address",
+  },
+};
+const idioma = (navigator.language || "es").toLowerCase().startsWith("es") ? "es" : "en";
+const T = TEXTOS[idioma];
+document.documentElement.lang = idioma;
+document.querySelectorAll("[data-t]").forEach((el) => {
+  const k = el.dataset.t;
+  if (T[k]) el.textContent = T[k];
+});
+document.querySelectorAll("[data-t-ph]").forEach((el) => {
+  const k = el.dataset.tPh;
+  if (T[k]) el.placeholder = T[k];
+});
+
 document.getElementById("f").addEventListener("submit", async (ev) => {
   ev.preventDefault();
   const b = document.getElementById("b"), e = document.getElementById("e"), ok = document.getElementById("ok");
@@ -142,7 +184,7 @@ document.getElementById("f").addEventListener("submit", async (ev) => {
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || "error");
-    ok.textContent = "Guardado. Reiniciando… recarga en unos segundos.";
+    ok.textContent = T.ok;
   } catch (err) {
     e.textContent = err.message;
     b.disabled = false;
