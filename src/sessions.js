@@ -33,6 +33,7 @@ export class SessionPool {
     this.desde = new Map(); // clave -> timestamp de inicio del run
     this.linksFile = path.join(cfg.sessionDir, "links.json");
     this.links = this.#loadLinks();
+    this.ultimaLista = new Map(); // clave -> último listado de sesiones mostrado
     this.idleMs = 30 * 60 * 1000;
     this.timer = setInterval(() => this.sweep(), 5 * 60 * 1000);
     this.timer.unref?.();
@@ -47,6 +48,30 @@ export class SessionPool {
       this.timerRot = setInterval(() => this.quizasRotar(), this.rotateEveryMs);
       this.timerRot.unref?.();
     }
+  }
+
+  /** Cambia el umbral/periodo de rotación sin reiniciar el proceso. */
+  configurarRotacion({ maxMb, minutos } = {}) {
+    if (maxMb !== undefined) this.rotateMb = Math.max(0, Number(maxMb) || 0);
+    if (minutos !== undefined) {
+      const ms = Math.max(1, Number(minutos) || 10) * 60 * 1000;
+      if (ms !== this.rotateEveryMs) {
+        this.rotateEveryMs = ms;
+        clearInterval(this.timerRot);
+        if (this.rotateMb > 0) {
+          this.timerRot = setInterval(() => this.quizasRotar(), ms);
+          this.timerRot.unref?.();
+        }
+      }
+    }
+    if (this.rotateMb <= 0) {
+      clearInterval(this.timerRot);
+      this.timerRot = null;
+    } else if (!this.timerRot) {
+      this.timerRot = setInterval(() => this.quizasRotar(), this.rotateEveryMs);
+      this.timerRot.unref?.();
+    }
+    this.log?.(`rotación: ${this.rotateMb} MB cada ${Math.round(this.rotateEveryMs / 60000)} min`);
   }
 
   /** Archiva el fichero de una conversación y deja que se cree uno limpio. */
@@ -161,6 +186,88 @@ export class SessionPool {
     await this.dispose(key);
     delete this.links[key];
     this.#saveLinks();
+  }
+
+  /**
+   * Sesiones disponibles para retomar: las de la carpeta del bot y las que ya
+   * se archivaron por rotación. Devuelve metadatos ligeros para poder elegir.
+   * Guarda la lista para que un índice numérico (/resume 3) siga valiendo
+   * tanto desde Discord como desde la web.
+   */
+  async listSessions(key, limite = 40) {
+    const actual = this.currentFile(key);
+    const actualReal = actual ? path.resolve(actual) : null;
+    const dirs = [
+      this.cfg.sessionDir,
+      path.join(this.cfg.sessionDir, "_archivo"),
+    ];
+    const dirBot = path.resolve(this.cfg.sessionDir);
+    const vistos = new Set();
+    const out = [];
+    for (const dir of dirs) {
+      let lista = [];
+      try {
+        lista = await SessionManager.listAll(dir);
+      } catch (e) {
+        this.log?.(`listSessions: no pude leer ${dir} (${e?.message})`);
+        continue;
+      }
+      for (const s of lista) {
+        if (!s?.path || vistos.has(s.path)) continue;
+        vistos.add(s.path);
+        const archivada = path.dirname(path.resolve(s.path)) !== dirBot;
+        out.push({
+          path: s.path,
+          file: path.basename(s.path),
+          id: s.id ?? "",
+          name: s.name ?? "",
+          archivada,
+          mensajes: s.messageCount ?? 0,
+          creada: s.created instanceof Date ? s.created.toISOString() : null,
+          modificada: s.modified instanceof Date ? s.modified.toISOString() : null,
+          preview: String(s.firstMessage ?? "").replace(/\s+/g, " ").trim().slice(0, 140),
+          actual: actualReal ? path.resolve(s.path) === actualReal : false,
+        });
+      }
+    }
+    out.sort((a, b) => String(b.modificada ?? "").localeCompare(String(a.modificada ?? "")));
+    const lista = out.slice(0, limite);
+    this.ultimaLista.set(key, lista);
+    return lista;
+  }
+
+  /**
+   * Retoma una conversación anterior enlazando la clave a su fichero.
+   * `ref` puede ser la ruta, el nombre de fichero, el ID (o prefijo) o el
+   * número que se mostró en el último listado.
+   */
+  async resume(key, ref) {
+    const busca = String(ref ?? "").trim();
+    if (!busca) throw new Error("falta la sesión que retomar");
+    let sesiones = this.ultimaLista.get(key) ?? [];
+    if (!sesiones.length) sesiones = await this.listSessions(key, 200);
+    let hallada = null;
+    if (/^\d+$/.test(busca)) {
+      const n = Number(busca);
+      hallada = sesiones[n - 1] ?? null;
+      if (!hallada) throw new Error(`no hay sesión número ${n} en la lista`);
+    } else {
+      hallada =
+        sesiones.find((s) => s.path === busca) ??
+        sesiones.find((s) => s.file === busca) ??
+        (busca.length >= 8 ? sesiones.find((s) => s.id?.startsWith(busca)) : null) ??
+        sesiones.find((s) => s.file.startsWith(busca)) ??
+        null;
+      // Puede ser una sesión que no estaba en el último listado (p. ej. de la
+      // terminal): si es un fichero real, se acepta igualmente.
+      if (!hallada && fs.existsSync(busca)) {
+        hallada = { path: busca, file: path.basename(busca), id: "", name: "", mensajes: 0 };
+      }
+    }
+    if (!hallada) throw new Error(`no encuentro la sesión "${busca}"`);
+    await this.link(key, hallada.path);
+    this.log(`retomada sesión para ${key}: ${path.basename(hallada.path)}`);
+    return hallada;
   }
 
   async get(key) {

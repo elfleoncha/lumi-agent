@@ -1166,6 +1166,7 @@ const CMDS = [
   { name: "compact", desc: "Compactar el contexto" },
   { name: "session", desc: "Sesiones guardadas" },
   { name: "list", desc: "Listar sesiones" },
+  { name: "resume", desc: "Retomar una conversación anterior (número o id)" },
   { name: "skills", desc: "Skills disponibles" },
   { name: "abort", desc: "Cancelar la respuesta en curso" },
 ];
@@ -1239,6 +1240,9 @@ async function runCommand(raw) {
         $("msgs").innerHTML = "";
         addMsg("assistant", d.text);
       }, 400);
+    }
+    if (d.reload) {
+      setTimeout(() => loadHistory(true), 400);
     }
     refreshStats();
     refreshActivity(true);
@@ -1440,6 +1444,8 @@ const SET_MAP = [
   ["voice.mediaBase", "voice", "mediaBase"],
   ["push.ntfyTopic", "push", "ntfyTopic"],
   ["browser.port", "browser", "port"],
+  ["session.maxMb", "session", "maxMb"],
+  ["session.checkMinutes", "session", "checkMinutes"],
 ];
 
 function ponerValor(form, nombre, valor) {
@@ -1498,6 +1504,10 @@ $("settingsForm")?.addEventListener("submit", async (e) => {
     },
     push: { ntfyTopic: form.elements["push.ntfyTopic"].value },
     browser: { port: num(form.elements["browser.port"].value) },
+    session: {
+      maxMb: num(form.elements["session.maxMb"].value),
+      checkMinutes: num(form.elements["session.checkMinutes"].value),
+    },
   };
 
   const pista = $("setHint");
@@ -1516,7 +1526,7 @@ $("settingsForm")?.addEventListener("submit", async (e) => {
     const res = await api("/api/settings", { method: "POST", body: JSON.stringify(body) });
     const d = await res.json();
     if (!res.ok) throw new Error(d.error || "error");
-    decir("✓ " + t("guardado. Reinicia el bot para aplicarlo."));
+    decir("✓ " + t("guardado. Los puertos y el HTTPS se aplican al reiniciar; el resto ya está activo."));
     setTimeout(() => {
       // fuera de la hoja salvo que haya un error, para que se note que se ha guardado
       if (!pista.classList.contains("set__hint--error")) {
@@ -1572,6 +1582,109 @@ document.querySelectorAll("[data-test]").forEach((btn) => {
     hoja.hidden ? abrir() : cerrar();
   });
   $("settingsClose")?.addEventListener("click", cerrar);
+  hoja.addEventListener("click", (e) => {
+    if (e.target === hoja) cerrar();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !hoja.hidden) cerrar();
+  });
+})();
+
+/* ============================================================
+   Conversaciones: selector para retomar una sesión anterior
+   ============================================================ */
+(() => {
+  const hoja = $("sessionsSheet");
+  const btn = $("sessionsBtn");
+  const lista = $("sessionsList");
+  if (!hoja || !btn || !lista) return;
+
+  const fmt = (iso) => {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "—";
+    return d.toLocaleString("es-ES", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const cerrar = () => {
+    hoja.hidden = true;
+  };
+
+  const pintar = (sesiones) => {
+    lista.innerHTML = "";
+    if (!sesiones?.length) {
+      lista.innerHTML = '<p class="small sesiones__vacio">Todavía no hay conversaciones guardadas.</p>';
+      return;
+    }
+    for (const s of sesiones) {
+      const el = document.createElement("button");
+      el.type = "button";
+      el.className = "sesion" + (s.actual ? " sesion--actual" : "");
+      el.disabled = !!s.actual;
+      el.innerHTML = `
+        <span class="sesion__top">
+          <b class="sesion__fecha">${esc(fmt(s.modificada))}</b>
+          <span class="sesion__meta">${s.mensajes} msgs${s.archivada ? " · archivada" : ""}${s.actual ? " · actual" : ""}</span>
+        </span>
+        ${s.name ? `<span class="sesion__nombre">${esc(s.name)}</span>` : ""}
+        <span class="sesion__preview">${esc(s.preview || "(vacía)")}</span>`;
+      el.addEventListener("click", () => retomar(s));
+      lista.appendChild(el);
+    }
+  };
+
+  const cargar = async () => {
+    lista.innerHTML = '<p class="small sesiones__vacio">Cargando…</p>';
+    try {
+      const res = await api("/api/sessions?limit=60");
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || `HTTP ${res.status}`);
+      pintar(d.sessions);
+    } catch (e) {
+      lista.innerHTML = `<p class="small sesiones__vacio">⚠️ ${esc(e.message)}</p>`;
+    }
+  };
+
+  const retomar = async (s) => {
+    if (busy) {
+      alert(t("Hay una respuesta en curso. Cancélala antes de cambiar de sesión."));
+      return;
+    }
+    const ok = confirm(
+      `¿Retomar la conversación del ${fmt(s.modificada)} (${s.mensajes} mensajes)?\n\nSustituye a la conversación que hay ahora en este canal.`,
+    );
+    if (!ok) return;
+    lista.querySelectorAll("button").forEach((b) => (b.disabled = true));
+    try {
+      const res = await api("/api/sessions/resume", {
+        method: "POST",
+        body: JSON.stringify({ path: s.path }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || `HTTP ${res.status}`);
+      cerrar();
+      await loadHistory(true);
+      refreshStats();
+      $("topSub").textContent = t("Conversación retomada");
+    } catch (e) {
+      alert(t("No pude retomar la conversación") + ": " + e.message);
+      cargar();
+    }
+  };
+
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("side")?.classList.remove("open");
+    hoja.hidden = false;
+    cargar();
+  });
+  $("sessionsClose")?.addEventListener("click", cerrar);
+  $("sessionsRefresh")?.addEventListener("click", cargar);
   hoja.addEventListener("click", (e) => {
     if (e.target === hoja) cerrar();
   });

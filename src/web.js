@@ -483,6 +483,7 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
       },
       push: { ntfyTopic: c.ntfyTopic ?? "" },
       browser: { port: c.browserPort ?? 4479 },
+      session: { maxMb: c.sessionMaxMb ?? 18, checkMinutes: c.sessionCheckMinutes ?? 10 },
       paths: { sessionDir: c.sessionDir ?? "", skillsDir: c.skillsDir ?? "" },
     });
   });
@@ -530,9 +531,24 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
       }
       if (b.push) c.ntfyTopic = String(b.push.ntfyTopic ?? "");
       if (b.browser?.port) c.browserPort = Number(b.browser.port);
+      if (b.session) {
+        if (b.session.maxMb !== undefined && b.session.maxMb !== null) {
+          c.sessionMaxMb = Math.max(0, Number(b.session.maxMb) || 0);
+        }
+        if (b.session.checkMinutes) {
+          c.sessionCheckMinutes = Math.max(1, Number(b.session.checkMinutes) || 10);
+        }
+      }
 
       escribirJson(rutaConfig, c);
       escribirJson(rutaSecret, s);
+      // La rotación se aplica sin reiniciar.
+      try {
+        pool.configurarRotacion?.({
+          maxMb: c.sessionMaxMb ?? 18,
+          minutos: c.sessionCheckMinutes ?? 10,
+        });
+      } catch {}
       log("ajustes guardados desde la web");
       res.json({ ok: true, restart: true });
     } catch (e) {
@@ -659,6 +675,25 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
         case "new":
           await pool.newSession(ownerKey);
           return res.json({ text: "Contexto limpio. ¿Por dónde vamos?", clear: true });
+        case "resume": {
+          if (!valor) {
+            const lista = await pool.listSessions(ownerKey, 15);
+            const rows = lista.map((s, i) => {
+              const fecha = (s.modificada ?? "").slice(0, 16).replace("T", " ");
+              const extra = `${s.archivada ? " · archivada" : ""}${s.actual ? " · actual" : ""}`;
+              return `**${i + 1}.** \`${fecha}\` · ${s.mensajes} msgs${extra}${s.name ? ` · ${s.name}` : ""}\n   ${(s.preview || "_vacía_").slice(0, 100)}`;
+            });
+            return res.json({ text: rows.join("\n") || "_sin sesiones_", sessions: true });
+          }
+          if (pool.isBusy(ownerKey)) {
+            return res.json({ text: "Hay una respuesta en curso. Cancélala antes de cambiar de sesión." });
+          }
+          const s = await pool.resume(ownerKey, valor);
+          return res.json({
+            text: `Retomada \`${s.file}\`${s.mensajes ? ` · ${s.mensajes} mensajes` : ""}.`,
+            reload: true,
+          });
+        }
         case "session":
         case "list": {
           const stored = await listBotSessions(cfg.sessionDir);
@@ -894,6 +929,31 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
       res.json({ ok: true });
     } catch (e) {
       res.status(500).json({ error: String(e?.message ?? e) });
+    }
+  });
+
+  // --- selector de sesiones / retomar conversación -----------------------
+  app.get("/api/sessions", auth, async (req, res) => {
+    try {
+      const limite = Math.min(Number(req.query.limit) || 40, 200);
+      res.set("Cache-Control", "no-store");
+      res.json({ sessions: await pool.listSessions(ownerKey, limite) });
+    } catch (e) {
+      res.status(500).json({ error: String(e?.message ?? e) });
+    }
+  });
+
+  app.post("/api/sessions/resume", auth, async (req, res) => {
+    if (pool.isBusy(ownerKey)) {
+      return res.status(409).json({ error: "Hay una respuesta en curso. Cancélala antes de cambiar de sesión." });
+    }
+    try {
+      const ref = req.body?.path ?? req.body?.ref ?? req.body?.id;
+      const sesion = await pool.resume(ownerKey, ref);
+      log(`sesión retomada desde la web: ${path.basename(sesion.path)}`);
+      res.json({ ok: true, session: sesion });
+    } catch (e) {
+      res.status(400).json({ error: String(e?.message ?? e) });
     }
   });
 

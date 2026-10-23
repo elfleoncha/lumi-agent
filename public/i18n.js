@@ -119,6 +119,15 @@ const DICT = {
     "sin cambios": "unchanged",
     "(sin cambios)": "(unchanged)",
 
+    // ---- sesiones
+    "Sesiones": "Sessions",
+    "Rotar a partir de (MB)": "Rotate above (MB)",
+    "Comprobar cada (min)": "Check every (min)",
+    "Compactar el contexto no borra: el fichero de la conversación solo crece y cada turno cuesta más. Al pasar del tamaño indicado se archiva y se empieza una conversación nueva (queda copia en texto).":
+      "Compacting does not delete: the conversation file only grows and every turn costs more. Past the given size it is archived and a new conversation starts (a plain-text copy is kept).",
+    "0 MB = no rotar nunca (a cambio de respuestas más lentas cuando el fichero engorda).":
+      "0 MB = never rotate (at the cost of slower answers as the file grows).",
+
     // ---- textos generados
     "día": "day",
     "días": "days",
@@ -138,7 +147,8 @@ const DICT = {
 
     "guardando…": "saving…",
     "Guardando…": "Saving…",
-    "guardado. Reinicia el bot para aplicarlo.": "saved. Restart the bot to apply it.",
+    "guardado. Los puertos y el HTTPS se aplican al reiniciar; el resto ya está activo.":
+      "saved. Ports and HTTPS apply on restart; everything else is already active.",
     "Guardado": "Saved",
 
     // ---- avisos y errores del panel

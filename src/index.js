@@ -351,6 +351,32 @@ async function handleSlash(interaction) {
         break;
       }
 
+      case "resume": {
+        if (!valor.trim()) {
+          const lista = await pool.listSessions(key, 12);
+          if (!lista.length) {
+            out = "_no hay sesiones guardadas_";
+            break;
+          }
+          out =
+            "**Sesiones recientes**\n" +
+            lista
+              .map((s, i) => {
+                const fecha = (s.modificada ?? "").slice(0, 16).replace("T", " ");
+                const nombre = s.name ? `**${s.name}** · ` : "";
+                const extra = `${s.archivada ? " · archivada" : ""}${s.actual ? " · actual" : ""}`;
+                const preview = (s.preview || "_vacía_").slice(0, 90);
+                return `**${i + 1}.** ${nombre}\`${fecha}\` · ${s.mensajes} msgs${extra}\n   ${preview}`;
+              })
+              .join("\n") +
+            "\n\nRetomar con `/resume <número>` o `/resume <id>`";
+        } else {
+          const s = await pool.resume(key, valor);
+          out = `Retomada \`${s.file}\`${s.mensajes ? ` · ${s.mensajes} mensajes` : ""}. Contexto cargado.`;
+        }
+        break;
+      }
+
       case "link": {
         const found = await findPiSession(valor.trim());
         if (!found) {

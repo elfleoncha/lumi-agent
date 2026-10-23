@@ -89,8 +89,8 @@ sobrescribir con variables de entorno, que es lo normal en Docker.
 | `ntfyTopic` | `NTFY_TOPIC` | vacío |
 | `appName` | `LUMI_NAME` | `Lumi` |
 | `appTagline` | `LUMI_TAGLINE` | … |
-| `sessionMaxMb` | `LUMI_SESSION_MAX_MB` | `18` (`0` = no rotar) |
-| `sessionCheckMinutes` | — | `10` |
+| `sessionMaxMb` | `LUMI_SESSION_MAX_MB` | `18` (`0` = no rotar; también en Ajustes) |
+| `sessionCheckMinutes` | — | `10` (también en Ajustes) |
 | — | `WEB_PASSWORD` | — |
 | — | `DISCORD_TOKEN` | — |
 | — | `LUMI_CONFIG` / `LUMI_SECRET` | rutas alternativas |

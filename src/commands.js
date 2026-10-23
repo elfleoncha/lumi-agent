@@ -20,6 +20,7 @@ export const PI_BUILTINS = [
   { name: "compact", desc: "Compactar el contexto", arg: "instrucciones" },
   { name: "session", desc: "Info y estadísticas de la sesión" },
   { name: "list", desc: "Listar sesiones guardadas" },
+  { name: "resume", desc: "Retomar una conversación anterior", arg: "número, id o fichero" },
   { name: "link", desc: "Enlazar a una sesión por ID", arg: "sessionId" },
   { name: "linkmain", desc: "Enlazar a la sesión principal de terminal" },
   { name: "skills", desc: "Listar skills disponibles" },

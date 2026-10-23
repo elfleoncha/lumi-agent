@@ -14,7 +14,7 @@
 <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg?v=1">
   <link rel="icon" type="image/png" sizes="64x64" href="/icons/favicon.png?v=1">
   <link rel="shortcut icon" href="/icons/favicon.png?v=1">
-<link rel="stylesheet" href="/style.css?v=52">
+<link rel="stylesheet" href="/style.css?v=53">
 </head>
 <body>
 
@@ -74,6 +74,7 @@
 
     <div class="side__foot">
       <button id="settingsBtn" class="btn-ghost">Ajustes</button>
+      <button id="sessionsBtn" class="btn-ghost">Conversaciones</button>
       <a id="liveBrowser" class="btn-ghost" href="#" target="_blank" rel="noopener">Ver navegador en vivo</a>
       <button id="compactBtn" class="btn-ghost">Compactar contexto</button>
       <button id="newBtn" class="btn-ghost">Nueva conversación</button>
@@ -142,13 +143,26 @@
     </section>
 
 
+    <!-- ===== Conversaciones (retomar sesión anterior) ===== -->
+    <div class="sheet" id="sessionsSheet" hidden>
+      <div class="sheet__head">
+        <b>Conversaciones</b>
+        <button type="button" class="sheet__x" id="sessionsClose" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="sheet__body" id="sessionsBody" data-title="Conversaciones">
+        <p class="small sesiones__hint">Elige una conversación y la retomo en este canal, con su contexto.</p>
+        <div class="sesiones" id="sessionsList" aria-live="polite"></div>
+        <button type="button" class="btn-ghost sesiones__refresh" id="sessionsRefresh">Actualizar</button>
+      </div>
+    </div>
+
     <!-- ===== Ajustes (hoja desde el menú) ===== -->
     <div class="sheet" id="settingsSheet" hidden>
       <div class="sheet__head">
         <b>Ajustes</b>
         <button type="button" class="sheet__x" id="settingsClose" aria-label="Cerrar">✕</button>
       </div>
-      <div class="sheet__body" id="ovSettings">
+      <div class="sheet__body" id="ovSettings" data-title="Ajustes">
 
         <form id="settingsForm" class="set">
           <section class="set__group">
@@ -180,6 +194,16 @@
               </select>
             </label>
             <label>Directorio de trabajo <input name="model.agentCwd" placeholder="~" /></label>
+          </section>
+
+          <section class="set__group">
+            <h4>Sesiones</h4>
+            <p class="set__note">Compactar el contexto no borra: el fichero de la conversación solo crece y cada turno cuesta más. Al pasar del tamaño indicado se archiva y se empieza una conversación nueva (queda copia en texto).</p>
+            <div class="set__row">
+              <label class="set__inline">Rotar a partir de (MB) <input name="session.maxMb" type="number" min="0" step="1" placeholder="18" /></label>
+              <label class="set__inline">Comprobar cada (min) <input name="session.checkMinutes" type="number" min="1" step="1" placeholder="10" /></label>
+            </div>
+            <p class="set__hint">0 MB = no rotar nunca (a cambio de respuestas más lentas cuando el fichero engorda).</p>
           </section>
 
           <section class="set__group">
@@ -345,6 +369,6 @@
 </div>
 
 <script type="module" src="/i18n-boot.js?v=2"></script>
-<script type="module" src="/app.js?v=19"></script>
+<script type="module" src="/app.js?v=20"></script>
 </body>
 </html>
