@@ -1,0 +1,19 @@
+{
+  "ownerIds": [
+    "TU_ID_DE_DISCORD"
+  ],
+  "guildAllowlist": [],
+  "sessionDir": "./sessions",
+  "agentCwd": "~",
+  "maxQueue": 5,
+  "webPort": 4477,
+  "webPortHttps": 4478,
+  "browserPort": 4479,
+  "thinkingLevel": "minimal",
+  "voiceEnabled": false,
+  "castDevice": "Salon",
+  "castVoice": "es-ES-AlvaroNeural",
+  "ntfyTopic": "",
+  "appName": "Lumi",
+  "appTagline": "Tu asistente personal, en casa y en tu bolsillo"
+}

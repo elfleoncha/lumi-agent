@@ -1,0 +1,32 @@
+node_modules/
+.venv/
+sessions/
+media/
+uploads/
+public/files/
+.browser-profile/
+certs/
+secret.json
+config.json
+*.log
+.DS_Store
+__pycache__/
+
+# certificados y claves (el TLS de Tailscale va aquí: NUNCA al repo)
+certs-tls/
+*.pem
+*.key
+*.jks
+*.keystore
+
+# datos personales que no deben publicarse jamás
+backups/
+*.jsonl
+*.jsonl.old-*
+links.json
+.browser-profile/
+media/in/
+media/out/
+
+# carpeta de pruebas locales
+/files/

@@ -1,0 +1,43 @@
+{
+  "name": "lumi-assistant",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "start:web": "LUMI_NO_DISCORD=1 node src/index.js",
+    "check:secrets": "./scripts/check-secrets.sh",
+    "lint": "node --check src/index.js && node --check src/web.js && node --check public/app.js"
+  },
+  "dependencies": {
+    "@earendil-works/pi-coding-agent": "1.4.0",
+    "discord.js": "^14.16.3",
+    "express": "^5.3.0",
+    "multer": "^2.4.0"
+  },
+  "description": "Asistente personal autoalojado: Discord + panel web, voz, navegador en vivo y memoria persistente, sobre pi.",
+  "license": "MIT",
+  "author": "Leon (elfleoncha)",
+  "homepage": "https://github.com/elfleoncha/lumi#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elfleoncha/lumi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/elfleoncha/lumi/issues"
+  },
+  "keywords": [
+    "assistant",
+    "discord-bot",
+    "ai",
+    "pi",
+    "self-hosted",
+    "dashboard"
+  ],
+  "bin": {
+    "lumi": "bin/lumi.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

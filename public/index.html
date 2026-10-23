@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0f">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png?v=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Lumi">
+  <meta name="mobile-web-app-capable" content="yes">
+<title>Lumi</title>
+<link rel="icon" type="image/svg+xml" href="/icons/favicon.svg?v=1">
+  <link rel="icon" type="image/png" sizes="64x64" href="/icons/favicon.png?v=1">
+  <link rel="shortcut icon" href="/icons/favicon.png?v=1">
+<link rel="stylesheet" href="/style.css?v=52">
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="login" class="login">
+  <form id="loginForm" class="login__card">
+    <div class="login__mark"><svg class="mark__svg" viewBox="0 0 13 10" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="0" width="1" height="1"/><rect x="10" y="0" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="9" y="1" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="7" y="2" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="9" y="2" width="1" height="1"/><rect x="10" y="2" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="7" y="3" width="1" height="1"/><rect x="8" y="3" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="11" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1" class="eye"/><rect x="5" y="4" width="1" height="1" class="eye"/><rect x="6" y="4" width="1" height="1"/><rect x="7" y="4" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="9" y="4" width="1" height="1" class="eye"/><rect x="10" y="4" width="1" height="1" class="eye"/><rect x="11" y="4" width="1" height="1"/><rect x="12" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="4" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="7" y="5" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="9" y="5" width="1" height="1"/><rect x="10" y="5" width="1" height="1"/><rect x="11" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/><rect x="7" y="6" width="1" height="1"/><rect x="8" y="6" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="10" y="6" width="1" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="2" y="7" width="1" height="1"/><rect x="3" y="7" width="1" height="1"/><rect x="4" y="7" width="1" height="1"/><rect x="5" y="7" width="1" height="1"/><rect x="6" y="7" width="1" height="1"/><rect x="7" y="7" width="1" height="1"/><rect x="8" y="7" width="1" height="1"/><rect x="9" y="7" width="1" height="1"/><rect x="10" y="7" width="1" height="1"/><rect x="1" y="8" width="1" height="1"/><rect x="2" y="8" width="1" height="1"/><rect x="10" y="8" width="1" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="1" y="9" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/></svg></div>
+    <h1 id="brandName" data-brand="name">Lumi</h1>
+    <p id="brandTagline" data-brand="tagline">Acceso privado</p>
+    <input id="pass" class="field" type="password" placeholder="Contraseña"
+           autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+    <button type="submit" class="btn-primary">Entrar</button>
+    <div id="loginErr" class="err"></div>
+  </form>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app" class="app hidden">
+
+  <aside class="side" id="side">
+    <div class="brand">
+      <span class="brand__mark"><svg class="mark__svg" viewBox="0 0 13 10" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="0" width="1" height="1"/><rect x="10" y="0" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="9" y="1" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="7" y="2" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="9" y="2" width="1" height="1"/><rect x="10" y="2" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="7" y="3" width="1" height="1"/><rect x="8" y="3" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="11" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1" class="eye"/><rect x="5" y="4" width="1" height="1" class="eye"/><rect x="6" y="4" width="1" height="1"/><rect x="7" y="4" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="9" y="4" width="1" height="1" class="eye"/><rect x="10" y="4" width="1" height="1" class="eye"/><rect x="11" y="4" width="1" height="1"/><rect x="12" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="4" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="7" y="5" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="9" y="5" width="1" height="1"/><rect x="10" y="5" width="1" height="1"/><rect x="11" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/><rect x="7" y="6" width="1" height="1"/><rect x="8" y="6" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="10" y="6" width="1" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="2" y="7" width="1" height="1"/><rect x="3" y="7" width="1" height="1"/><rect x="4" y="7" width="1" height="1"/><rect x="5" y="7" width="1" height="1"/><rect x="6" y="7" width="1" height="1"/><rect x="7" y="7" width="1" height="1"/><rect x="8" y="7" width="1" height="1"/><rect x="9" y="7" width="1" height="1"/><rect x="10" y="7" width="1" height="1"/><rect x="1" y="8" width="1" height="1"/><rect x="2" y="8" width="1" height="1"/><rect x="10" y="8" width="1" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="1" y="9" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/></svg></span>
+      <span class="brand__name" id="brandNameSide" data-brand="name">Lumi</span>
+      <span class="brand__dot" id="statusDot"></span>
+    </div>
+
+    <div class="panel">
+      <div class="panel__title">Sesión</div>
+      <div class="row"><span>Modelo</span><b id="s-model">—</b></div>
+      <div class="row"><span>Mensajes</span><b id="s-msgs">—</b></div>
+      <div class="row"><span>Herramientas</span><b id="s-tools">—</b></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel__title">Consumo</div>
+      <div class="row"><span>Entrada</span><b id="c-in">—</b></div>
+      <div class="row"><span>Salida</span><b id="c-out">—</b></div>
+      <div class="row"><span>Cache</span><b id="c-cache">—</b></div>
+      <div class="meter"><i id="ctxBar"></i></div>
+      <div class="row small"><span>Contexto</span><b id="c-ctx">—</b></div>
+      <div class="row total"><span>Coste</span><b id="c-cost">—</b></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel__title">Servidor</div>
+      <div class="row"><span>RAM libre</span><b id="h-ram">—</b></div>
+      <div class="row"><span>Carga</span><b id="h-load">—</b></div>
+      <div class="row"><span>Uptime</span><b id="h-up">—</b></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel__title">Discord</div>
+      <div class="row"><span>Cuenta</span><b id="b-tag">—</b></div>
+      <div class="row"><span>Latencia</span><b id="b-ping">—</b></div>
+      <div class="row"><span>Uptime</span><b id="b-up">—</b></div>
+    </div>
+
+    <div class="side__foot">
+      <button id="settingsBtn" class="btn-ghost">Ajustes</button>
+      <a id="liveBrowser" class="btn-ghost" href="#" target="_blank" rel="noopener">Ver navegador en vivo</a>
+      <button id="compactBtn" class="btn-ghost">Compactar contexto</button>
+      <button id="newBtn" class="btn-ghost">Nueva conversación</button>
+      <button id="logoutBtn" class="btn-ghost dim">Salir</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="top" id="navbar">
+      <div class="top__left">
+        <button id="menuBtn" class="btn-ghost only-mobile top__menu" aria-label="Menú">☰</button>
+        <div class="top__id">
+          <h2><span class="top__title-full">Conversación</span><span class="top__title-short" data-brand="short">Lumi</span></h2>
+          <p class="small" id="topSub">Conectado</p>
+        </div>
+      </div>
+
+      <span class="top__divider" aria-hidden="true"></span>
+
+      <div class="top__right">
+        <div class="ov__tabs" role="tablist">
+          <span class="seg__thumb" aria-hidden="true"></span>
+          <button class="ov__tab on" data-tab="overview" role="tab">Resumen</button>
+          <button class="ov__tab" data-tab="models" role="tab">Modelos</button>
+        </div>
+        <div class="ov__range">
+          <span class="seg__thumb" aria-hidden="true"></span>
+          <button class="on" data-range="all">Todo</button>
+          <button data-range="30">30d</button>
+          <button data-range="7">7d</button>
+        </div>
+        <button id="ovToggle" class="ov__collapse" title="Mostrar/ocultar" aria-label="Mostrar/ocultar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ===== Panel de actividad / consumos ===== -->
+    <section class="ov" id="ov">
+      <div class="ov__body" id="ovOverview">
+        <div class="ov__cards">
+          <div class="ov-card"><span>Sesiones</span><b id="ov-sessions">—</b></div>
+          <div class="ov-card"><span>Mensajes</span><b id="ov-messages">—</b></div>
+          <div class="ov-card"><span>Tokens totales</span><b id="ov-tokens">—</b></div>
+          <div class="ov-card"><span>Días activos</span><b id="ov-days">—</b></div>
+        </div>
+
+        <div class="ov__metrics">
+          <div><span>Racha actual</span><b id="ov-streak">—</b><i class="spark" id="ov-streak-bar"></i></div>
+          <div><span>Racha máxima</span><b id="ov-best">—</b><i class="spark" id="ov-best-bar"></i></div>
+          <div><span>Hora punta</span><b id="ov-peak">—</b></div>
+          <div><span>Coste</span><b id="ov-cost">—</b></div>
+        </div>
+
+        <div class="heat" id="heat" aria-label="Actividad por día"></div>
+        <div class="ov__foot" id="ov-foot">Cargando actividad…</div>
+      </div>
+
+      <div class="ov__body hidden" id="ovModels">
+        <table class="ov__table">
+          <thead><tr><th>Modelo</th><th>Mensajes</th><th>Tokens</th><th>Coste</th></tr></thead>
+          <tbody id="ov-model-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+
+    <!-- ===== Ajustes (hoja desde el menú) ===== -->
+    <div class="sheet" id="settingsSheet" hidden>
+      <div class="sheet__head">
+        <b>Ajustes</b>
+        <button type="button" class="sheet__x" id="settingsClose" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="sheet__body" id="ovSettings">
+
+        <form id="settingsForm" class="set">
+          <section class="set__group">
+            <h4>Marca</h4>
+            <label>Nombre <input name="brand.name" placeholder="Lumi" /></label>
+            <label>Tagline <input name="brand.tagline" placeholder="Tu asistente personal" /></label>
+          </section>
+
+          <section class="set__group">
+            <h4>Discord</h4>
+            <label>Token del bot <input name="discord.token" type="password" placeholder="•••• (sin cambios)" /></label>
+            <label>IDs dueños (coma) <input name="discord.ownerIds" placeholder="123456789" /></label>
+            <label>Guilds permitidos (coma, vacío = todos) <input name="discord.guildAllowlist" /></label>
+            <div class="set__row">
+              <label class="set__inline">Cola máx. <input name="discord.maxQueue" type="number" min="1" max="20" /></label>
+              <button type="button" class="btn-ghost" data-test="discord">Probar Discord</button>
+            </div>
+          </section>
+
+          <section class="set__group">
+            <h4>Modelo y razonamiento</h4>
+            <label>Nivel de razonamiento
+              <select name="model.thinkingLevel">
+                <option value="minimal">minimal</option>
+                <option value="low">low</option>
+                <option value="medium">medium</option>
+                <option value="high">high</option>
+                <option value="max">max</option>
+              </select>
+            </label>
+            <label>Directorio de trabajo <input name="model.agentCwd" placeholder="~" /></label>
+          </section>
+
+          <section class="set__group">
+            <h4>Web</h4>
+            <div class="set__row">
+              <label class="set__inline">Puerto HTTP <input name="web.webPort" type="number" /></label>
+              <label class="set__inline">Puerto HTTPS <input name="web.webPortHttps" type="number" /></label>
+              <label class="set__inline set__check"><input name="web.https" type="checkbox" /> HTTPS</label>
+            </div>
+          </section>
+
+          <section class="set__group">
+            <h4>Voz (altavoces Cast)</h4>
+            <label class="set__check"><input name="voice.enabled" type="checkbox" /> Activar voz</label>
+            <label>Dispositivo <input name="voice.device" placeholder="Salon" /></label>
+            <label>Voz
+              <select name="voice.voice">
+                <option value="es-ES-AlvaroNeural">Álvaro (ES, hombre)</option>
+                <option value="es-ES-ElviraNeural">Elvira (ES, mujer)</option>
+                <option value="es-MX-JorgeNeural">Jorge (MX, hombre)</option>
+                <option value="es-AR-TomasNeural">Tomás (AR, hombre)</option>
+              </select>
+            </label>
+            <label>URL de audio (IP que ve el altavoz) <input name="voice.mediaBase" placeholder="http://192.168.0.10:4477/files" /></label>
+            <button type="button" class="btn-ghost" data-test="voice">Probar voz</button>
+          </section>
+
+          <section class="set__group">
+            <h4>Notificaciones push</h4>
+            <label>Tema de ntfy <input name="push.ntfyTopic" placeholder="lumi-abc123" /></label>
+            <button type="button" class="btn-ghost" data-test="push">Probar push</button>
+          </section>
+
+          <section class="set__group">
+            <h4>Navegador</h4>
+            <label class="set__inline">Puerto <input name="browser.port" type="number" /></label>
+          </section>
+
+          <div class="set__actions">
+            <button type="submit" class="btn-primary">Guardar ajustes</button>
+            <span class="set__hint" id="setHint"></span>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="msgs" class="msgs"></div>
+
+    <div class="bwin" id="browserPanel" hidden>
+      <div class="bwin__head">
+        <span class="bwin__dot"></span>
+        <b data-brand="navTitle">Navegador</b>
+        <span class="bwin__url" id="bwinUrl">conectando…</span>
+        <button type="button" class="bwin__btn" id="bwinReload" title="Recargar">⟳</button>
+        <button type="button" class="bwin__btn" id="bwinClose" title="Cerrar">✕</button>
+      </div>
+      <iframe id="liveFrame" title="navegador en vivo" referrerpolicy="no-referrer"></iframe>
+    </div>
+
+
+    <form id="chatForm" class="composer">
+          <button type="button" class="critter" id="critter" title="Asistente" aria-label="Asistente">
+            <span class="critter__stage">
+              <svg class="critter__svg" viewBox="0 0 13 10" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <!-- cuerpo -->
+                <g fill="var(--accent)">
+                  <rect x="2" y="0" width="1" height="1"/><rect x="10" y="0" width="1" height="1"/>
+                  <rect x="3" y="1" width="1" height="1"/><rect x="9" y="1" width="1" height="1"/>
+                  <rect x="2" y="2" width="9" height="1"/>
+                  <rect x="1" y="3" width="11" height="1"/>
+                  <rect x="1" y="4" width="3" height="1"/><rect x="6" y="4" width="3" height="1"/><rect x="11" y="4" width="2" height="1"/>
+                  <rect x="1" y="5" width="11" height="1"/>
+                  <rect x="1" y="6" width="11" height="1"/>
+                  <rect x="2" y="7" width="9" height="1"/>
+                  <rect x="1" y="8" width="2" height="1"/><rect x="10" y="8" width="2" height="1"/>
+                  <rect x="1" y="9" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/>
+                </g>
+                <!-- ojos -->
+                <g class="critter__eyes" fill="#0a0a0f">
+                  <rect x="4" y="4" width="2" height="1"/><rect x="9" y="4" width="2" height="1"/>
+                </g>
+                <!-- boca -->
+                <rect class="critter__mouth" x="5" y="6" width="3" height="1" fill="#0a0a0f"/>
+                <!-- portátil (oculto por defecto) -->
+                <g class="critter__laptop" fill="#f6f5fa" opacity="0">
+                  <rect x="3" y="7" width="7" height="1"/>
+                  <rect x="2" y="8" width="9" height="1"/>
+                  <rect x="4" y="7" width="5" height="1" fill="var(--accent)"/>
+                </g>
+                <!-- café -->
+                <g class="critter__mug" fill="#f6f5fa" opacity="0">
+                  <rect x="10" y="6" width="2" height="2"/>
+                  <rect x="12" y="6.5" width="0.6" height="1" fill="var(--accent)"/>
+                  <rect x="10.5" y="5.6" width="0.4" height="0.6" fill="var(--accent)"/>
+                  <rect x="11.4" y="5.6" width="0.4" height="0.6" fill="var(--accent)"/>
+                </g>
+                <!-- gafas de sol -->
+                <g class="critter__glasses" fill="#0a0a0f" opacity="0">
+                  <rect x="3" y="3.6" width="3" height="1.2" rx="0.4"/>
+                  <rect x="8" y="3.6" width="3" height="1.2" rx="0.4"/>
+                  <rect x="6" y="4" width="2" height="0.35" fill="#f6f5fa"/>
+                </g>
+                <!-- corazones -->
+                <g class="critter__hearts" fill="#f0a9f5" opacity="0">
+                  <rect x="0.4" y="1.6" width="0.9" height="0.9"/>
+                  <rect x="1.3" y="1.6" width="0.5" height="0.9"/>
+                  <rect x="0.4" y="2.1" width="1.4" height="0.5"/>
+                  <rect x="11.6" y="0.8" width="0.8" height="0.8"/>
+                  <rect x="12.4" y="0.8" width="0.4" height="0.8"/>
+                </g>
+                <!-- zzz -->
+                <g class="critter__zzz" fill="#d7ccff" opacity="0">
+                  <rect x="10" y="1.2" width="1.6" height="0.35"/>
+                  <rect x="10.9" y="1.2" width="0.35" height="0.75"/>
+                  <rect x="10" y="1.95" width="1.6" height="0.35"/>
+                  <rect x="11.4" y="0.2" width="1.2" height="0.3"/>
+                  <rect x="12" y="0.2" width="0.3" height="0.6"/>
+                  <rect x="11.4" y="0.8" width="1.2" height="0.3"/>
+                </g>
+                <!-- cohete -->
+                <g class="critter__flame" fill="#f0a9f5" opacity="0">
+                  <rect x="5.6" y="10.1" width="1" height="0.4"/>
+                  <rect x="6.1" y="10.5" width="0.8" height="0.4"/>
+                  <rect x="6.5" y="10.9" width="0.6" height="0.4"/>
+                </g>
+                <!-- aura al saltar -->
+                <g class="critter__spark" fill="var(--accent-soft)" opacity="0">
+                  <rect x="0" y="1" width="1" height="1"/><rect x="12" y="2" width="1" height="1"/>
+                  <rect x="0" y="6" width="1" height="1"/><rect x="12" y="7" width="1" height="1"/>
+                </g>
+              </svg>
+            </span>
+            <span class="critter__say" id="critterSay"></span>
+          </button>
+
+      <div class="cmds" id="cmdPalette" hidden>
+        <div class="cmds__hint">Comandos · <kbd>↑</kbd><kbd>↓</kbd> mover · <kbd>Tab</kbd> completar · <kbd>Esc</kbd> cerrar</div>
+        <div class="cmds__list" id="cmdList"></div>
+      </div>
+
+      <div class="composer__wrap">
+        <div id="attach" class="attach"></div>
+        <textarea id="input" rows="1" placeholder="Escribe un mensaje…"
+                  autocomplete="off" spellcheck="true"></textarea>
+        <div class="composer__actions">
+          <input type="file" id="fileInput" accept="image/*" multiple hidden>
+          <button type="button" id="imgBtn" class="btn-icon" title="Adjuntar imagen" aria-label="Imagen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.8" cy="9" r="1.6"/><path d="M21 15.5l-4.5-4.5L7 20"/></svg>
+          </button>
+          <button type="button" id="micBtn" class="btn-icon" title="Grabar audio" aria-label="Grabar audio">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/><path d="M8.5 21h7"/></svg>
+          </button>
+          <button type="submit" id="sendBtn" class="btn-send" aria-label="Enviar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </form>
+    <div class="hint" id="hint">
+      <kbd>Enter</kbd> envía · <kbd>Shift</kbd>+<kbd>Enter</kbd> salto de línea · pulsa el micro para dictar
+    </div>
+  </main>
+</div>
+
+<script src="/app.js?v=17"></script>
+</body>
+</html>

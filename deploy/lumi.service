@@ -1,0 +1,33 @@
+# Unidad systemd de ejemplo.
+#   sudo cp deploy/lumi.service /etc/systemd/system/lumi.service
+#   sudo systemctl daemon-reload && sudo systemctl enable --now lumi
+#   journalctl -u lumi -f
+[Unit]
+Description=Lumi (asistente personal)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=%i
+WorkingDirectory=/home/%i/lumi
+ExecStart=/usr/bin/node src/index.js
+Restart=always
+RestartSec=3
+Environment=NODE_ENV=production
+
+# Endurecimiento básico: Lumi ejecuta comandos, así que al menos limitamos
+# lo que puede tocar fuera de su carpeta.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+RestrictSUIDSGID=true
+# Ojo: ProtectHome/ProtectSystem romperían las herramientas del agente sobre
+# tus ficheros. Actívalos solo si aceptas que Lumi vea únicamente su carpeta.
+#ProtectHome=read-only
+#ProtectSystem=strict
+
+[Install]
+WantedBy=multi-user.target

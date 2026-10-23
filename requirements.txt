@@ -1,0 +1,9 @@
+# Solo para las funciones de voz y audio (el núcleo funciona sin esto).
+#   python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+faster-whisper>=1.0      # transcribir notas de voz entrantes
+PyChromecast>=14.0       # hablar por Chromecast / Nest
+edge-tts>=7.0            # voz de Cast (buena calidad, online)
+gTTS>=2.5                # voz de reserva (offline-ish)
+numpy>=1.26              # necesario por faster-whisper
+aiohttp>=3.9             # servicio del navegador en vivo
+playwright>=1.40         # navegador en vivo (requiere: playwright install chromium)
