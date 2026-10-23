@@ -7,7 +7,9 @@
 #     -v "$HOME/.pi:/root/.pi" \
 #     -v lumi-data:/app/sessions lumi
 #
-# `-v ~/.pi` es lo que trae las credenciales del modelo (auth.json de pi).
+# La clave del modelo va por variable de entorno (DEEPSEEK_API_KEY, OPENAI_API_KEY,
+# GROQ_API_KEY...). Montar ~/.pi también vale, pero en un contenedor limpio lo
+# fiable es la variable.
 FROM node:22-slim
 
 # ffmpeg y python: voz (Cast/TTS) y transcripción de notas de voz.

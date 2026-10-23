@@ -81,9 +81,14 @@ cat ~/.pi/agent/auth.json                   # aquí quedan las credenciales
 ```
 
 Lumi lee `~/.pi/agent/auth.json` al arrancar. Si no hay ninguna clave, el panel
-abre pero al escribir el primer mensaje verás un error del proveedor.
-Alternativa sin tocar `~/.pi`: exporta `DEEPSEEK_API_KEY` (o la del proveedor)
-en el entorno antes de arrancar.
+abre pero al escribir el primer mensaje sale "No API key found".
+
+La alternativa (y la única fiable en Docker) es una **variable de entorno**:
+
+```bash
+export DEEPSEEK_API_KEY=sk-...
+# o OPENAI_API_KEY, GROQ_API_KEY...
+```
 
 ### 2. Instalar Lumi
 
@@ -181,12 +186,17 @@ La conversación anterior no se pierde: queda en texto plano y puedes releerla.
 ## Docker
 
 Incluye `Dockerfile` y `docker-compose.yml` (panel, ffmpeg y venv dentro).
-Monta `./config.json`, `./secret.json` y `~/.pi` (credenciales del modelo).
 
 ```bash
+cp .env.example .env        # pon DEEPSEEK_API_KEY (o la de tu proveedor)
 docker compose up -d
 docker compose logs -f
 ```
+
+Las credenciales van por **variable de entorno**, no montando `~/.pi`: dentro de
+un contenedor limpio el SDK no siempre encuentra el `auth.json` (probado, es lo
+que falla primero). Si aun así lo prefieres, el `docker-compose.yml` tiene la
+línea comentada.
 
 ## Pruebas
 

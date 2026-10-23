@@ -14,11 +14,14 @@ services:
     ports:
       - "4477:4477"   # panel (http)
       - "4478:4478"   # panel (https), si hay certificados
+    env_file:
+      - .env            # DEEPSEEK_API_KEY / OPENAI_API_KEY / DISCORD_TOKEN...
     volumes:
       - ./config.json:/app/config.json:ro
       - ./secret.json:/app/secret.json:ro
-      # credenciales del modelo (pi): auth.json y compañía
-      - ${HOME}/.pi:/root/.pi
+      # Opcional: si prefieres las credenciales de pi en vez de variables de
+      # entorno. Ojo: en un contenedor limpio lo más fiable es la variable.
+      #- ${HOME}/.pi:/root/.pi:ro
       # datos: conversaciones, medios, ficheros servidos y ajustes
       - lumi-sessions:/app/sessions
       - lumi-media:/app/media
