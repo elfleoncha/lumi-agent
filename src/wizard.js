@@ -50,7 +50,7 @@ function reiniciar() {
   process.exit(0);
 }
 
-export function startWizard({ port = 4477, host = "0.0.0.0", dirs, log }) {
+export function startWizard({ port = 4477, host = "0.0.0.0", configPath, secretPath, home, log }) {
   const app = express();
   app.use(express.json({ limit: "1mb" }));
   app.disable("x-powered-by");
@@ -76,8 +76,8 @@ export function startWizard({ port = 4477, host = "0.0.0.0", dirs, log }) {
     const config = {
       ownerIds: owners,
       guildAllowlist: [],
-      sessionDir: path.join(dirs.root, "sessions"),
-      agentCwd: b.agentCwd ? String(b.agentCwd) : dirs.home,
+      sessionDir: path.join(path.dirname(configPath), "sessions"),
+      agentCwd: b.agentCwd ? String(b.agentCwd) : home,
       maxQueue: 5,
       webPort: Number(b.webPort) || port,
       webPortHttps: Number(b.webPortHttps) || 0,
@@ -92,11 +92,9 @@ export function startWizard({ port = 4477, host = "0.0.0.0", dirs, log }) {
     };
 
     try {
-      fs.writeFileSync(path.join(dirs.root, "config.json"), JSON.stringify(config, null, 2) + "\n", {
-        mode: 0o600,
-      });
+      fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n", { mode: 0o600 });
       fs.writeFileSync(
-        path.join(dirs.root, "secret.json"),
+        secretPath,
         JSON.stringify({ token, webPassword: pin }, null, 2) + "\n",
         { mode: 0o600 },
       );

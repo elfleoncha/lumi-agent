@@ -53,7 +53,11 @@ const RUTA_CONFIG = process.env.LUMI_CONFIG || path.join(ROOT_PROYECTO, "config.
 if (!fs.existsSync(RUTA_CONFIG)) {
   startWizard({
     port: Number(process.env.WEB_PORT) || 4477,
-    dirs: { root: path.dirname(RUTA_CONFIG), home: os.homedir() },
+    // rutas exactas: antes escribía siempre config.json/secret.json y con
+    // LUMI_CONFIG a otro nombre el asistente volvía a salir en bucle
+    configPath: RUTA_CONFIG,
+    secretPath: process.env.LUMI_SECRET || path.join(ROOT_PROYECTO, "secret.json"),
+    home: os.homedir(),
     log,
   });
   // el asistente termina con process.exit(0)
