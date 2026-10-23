@@ -130,6 +130,7 @@ const DICT = {
     "tokens más que El Señor de los Anillos.": "more tokens than The Lord of the Rings.",
     "tokens para igualar El Señor de los Anillos.": "tokens to match The Lord of the Rings.",
     "No pude cargar la actividad": "Could not load activity",
+    "No pude cargar la conversación": "Could not load the conversation",
     "No pude cancelar": "Could not cancel",
     "Certificado no válido": "Invalid certificate",
     "Servidor caído": "Server down",
@@ -146,6 +147,7 @@ const DICT = {
     "Reintentar": "Retry",
     "Reconectando…": "Reconnecting…",
     "No pude cargar la actividad": "Could not load activity",
+    "No pude cargar la conversación": "Could not load the conversation",
     "debes iniciar sesión": "you need to sign in",
     "sesión caducada": "session expired",
     "Ese comando no existe": "no such command",
@@ -214,7 +216,13 @@ function dentroDe(nodo, conjunto) {
 
 const excluido = (nodo) => dentroDe(nodo, SIN_TEXTO);
 
-/** Traduce el texto de un nodo si tenemos su traducción. Idempotente. */
+/**
+ * Traduce el texto de un nodo si tenemos su traducción. Idempotente.
+ *
+ * OJO: solo escribe si el valor cambia de verdad. Antes reasignaba siempre, eso
+ * disparaba el MutationObserver y volvía a traducir en bucle infinito: la
+ * pestaña se quedaba en blanco y el navegador acababa ahogándose.
+ */
 function traducirNodoTexto(nodo) {
   const original = nodo.__original ?? nodo.nodeValue;
   const limpio = original.trim();
@@ -224,7 +232,9 @@ function traducirNodoTexto(nodo) {
   nodo.__original = original;
   const sangria = original.match(/^\s*/)[0];
   const cola = original.match(/\s*$/)[0];
-  nodo.nodeValue = sangria + nuevo + cola;
+  const destino = sangria + nuevo + cola;
+  if (nodo.nodeValue === destino) return; // nada que hacer: no generamos mutación
+  nodo.nodeValue = destino;
 }
 
 // originales de atributos (dataset no admite guiones en el nombre)
@@ -264,6 +274,7 @@ export function aplicar(raiz = document.body) {
 export function vigilar(raiz = document.body) {
   if (!raiz || typeof MutationObserver === "undefined") return;
   const ob = new MutationObserver((cambios) => {
+    if (ob._aplicando) return;
     for (const c of cambios) {
       if (c.type === "characterData") {
         if (!excluido(c.target)) {
@@ -272,12 +283,22 @@ export function vigilar(raiz = document.body) {
         }
       } else {
         for (const n of c.addedNodes) {
-          if (n.nodeType === 1) aplicar(n);
+          if (n.nodeType === 1) aplicarSilencioso(n);
           else if (n.nodeType === 3 && !excluido(n)) traducirNodoTexto(n);
         }
       }
     }
   });
+  // Mientras aplicamos traducciones no escuchamos nuestros propios cambios.
+  const aplicarSilencioso = (n) => {
+    ob._aplicando = true;
+    try {
+      aplicar(n);
+    } finally {
+      ob._aplicando = false;
+    }
+  };
+  ob.aplicarSilencioso = aplicarSilencioso;
   ob.observe(raiz, { childList: true, subtree: true, characterData: true });
   return ob;
 }

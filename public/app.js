@@ -167,7 +167,16 @@ async function loadHistory(force = false) {
       return;
     }
     for (const m of messages) addMsg(m.role, m.text);
-  } catch {}
+  } catch (e) {
+    // Nunca dejar la conversación en blanco sin explicación: si falla, se dice
+    // y se ofrece reintentar (antes el área se quedaba vacía y parecía roto).
+    if (!force && document.querySelector("#msgs .msg")) return;
+    const cuerpo = addMsg("assistant", "");
+    cuerpo.innerHTML =
+      render("⚠️ " + t("No pude cargar la conversación") + ".") +
+      `<div class="netwarn"><button type="button" class="netwarn__retry">${t("Reintentar")}</button></div>`;
+    cuerpo.querySelector(".netwarn__retry")?.addEventListener("click", () => loadHistory(true));
+  }
 }
 
 let lastSent = "";
