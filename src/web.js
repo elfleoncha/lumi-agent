@@ -903,9 +903,16 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
   // salen con el nombre de tu instancia desde el primer byte, sin esperar a
   // JavaScript. Va ANTES de express.static o el estático sirve la plantilla.
   let htmlIndex = null;
+  let htmlMtime = 0;
   const renderIndex = () => {
-    if (!htmlIndex) {
-      const plantilla = fs.readFileSync(path.join(__dirname, "..", "public", "index.html"), "utf8");
+    // Se cachea pero se invalida si el fichero cambia (antes había que reiniciar
+    // el bot para que se aplicasen los cambios del HTML).
+    const ruta = path.join(__dirname, "..", "public", "index.html");
+    const mtime = fs.statSync(ruta).mtimeMs;
+    if (htmlIndex && htmlMtime === mtime) return htmlIndex;
+    htmlMtime = mtime;
+    {
+      const plantilla = fs.readFileSync(ruta, "utf8");
       const b = branding;
       htmlIndex = plantilla
         .replaceAll("{{NAME}}", escapeHtml(b.name))
