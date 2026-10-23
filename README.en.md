@@ -73,7 +73,7 @@ machine.
 
 ## Quick start
 
-Requirements: **Node 20+** and an API key for a model. Optionally **ffmpeg** +
+Requirements: **Node 22.19+** and an API key for a model. Optionally **ffmpeg** +
 Python for voice and the live browser.
 
 ### 1. Configure the model (first thing)

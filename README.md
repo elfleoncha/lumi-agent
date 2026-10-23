@@ -68,7 +68,7 @@ No es un SaaS ni multiusuario: es *tu* asistente, en *tu* máquina.
 
 ## Instalación rápida
 
-Requisitos: **Node 20+** y una clave de API de un modelo. Opcionalmente
+Requisitos: **Node 22.19+** y una clave de API de un modelo. Opcionalmente
 **ffmpeg** + Python para voz y navegador.
 
 ### 1. Configurar el modelo (lo primero)

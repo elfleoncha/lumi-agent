@@ -16,11 +16,15 @@ aviso() { printf '\033[38;5;214m%s\033[0m\n' "$1"; }
 
 echo "· comprobando Node"
 if ! command -v node >/dev/null 2>&1; then
-  echo "Hace falta Node 20 o superior: https://nodejs.org" >&2
+  echo "Hace falta Node 22.19 o superior: https://nodejs.org" >&2
   exit 1
 fi
 MAYOR=$(node -p 'process.versions.node.split(".")[0]')
-[ "$MAYOR" -ge 20 ] || { echo "Node $(node -v) es demasiado antiguo (mínimo 20)" >&2; exit 1; }
+MENOR=$(node -p 'process.versions.node.split(".")[1]')
+if [ "$MAYOR" -lt 22 ] || { [ "$MAYOR" -eq 22 ] && [ "$MENOR" -lt 19 ]; }; then
+  echo "Node $(node -v) es demasiado antiguo: pi necesita 22.19 o superior" >&2
+  exit 1
+fi
 verde "  node $(node -v) ok"
 
 if [ "$DESTINO" != "$ORIGEN" ]; then
