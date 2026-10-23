@@ -1,6 +1,22 @@
 import { t, aplicar, ponerIdioma, idiomaActual, IDIOMAS } from "/i18n.js?v=2";
 
 const $ = (id) => document.getElementById(id);
+
+/* Botón de emergencia: /?reset=1 borra el service worker y las cachés del
+   navegador y vuelve a cargar. Para cuando el móvil se queda con una versión
+   vieja pegada y no hay forma de sacarlo de ahí. */
+if (new URL(location.href).searchParams.has("reset")) {
+  (async () => {
+    try {
+      const regs = (await navigator.serviceWorker?.getRegistrations?.()) ?? [];
+      await Promise.all(regs.map((r) => r.unregister()));
+      const claves = (await caches?.keys?.()) ?? [];
+      await Promise.all(claves.map((k) => caches.delete(k)));
+    } catch {}
+    sessionStorage.clear();
+    location.replace("/");
+  })();
+}
 const TOKEN_KEY = "valen.token";
 
 let token = localStorage.getItem(TOKEN_KEY) || "";
