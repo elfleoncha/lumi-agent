@@ -145,10 +145,20 @@ function scrollDown() {
   m.scrollTop = m.scrollHeight;
 }
 
-async function loadHistory() {
+/**
+ * Repinta la conversación desde el servidor.
+ *
+ * OJO: el servidor escribe el turno en el JSONL al TERMINAR, así que justo
+ * después de una respuesta el historial puede venir con menos mensajes de los
+ * que hay en pantalla. Antes eso borraba la respuesta recién llegada; ahora no
+ * se permite "encoger" la conversación salvo que se pida a propósito (force).
+ */
+async function loadHistory(force = false) {
   try {
     const res = await api("/api/history?limit=300");
     const { messages } = await res.json();
+    const enPantalla = document.querySelectorAll("#msgs .msg").length;
+    if (!force && messages.length < enPantalla && enPantalla > 0) return;
     $("msgs").innerHTML = "";
     if (!messages.length) {
       addMsg("assistant", "Hola. Aquí estoy, desde el navegador.");
@@ -233,7 +243,8 @@ async function cancelar() {
   }
   busy = false;
   quitarBurbujaPendiente();
-  await loadHistory();
+  // aquí sí puede encoger: lo que se estaba escribiendo se ha descartado
+  await loadHistory(true);
   scrollDown();
   refreshStats();
   $("topSub").textContent = "Cancelado";

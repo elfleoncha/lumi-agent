@@ -120,7 +120,7 @@ const PAGINA = `<!doctype html>
   <input name="token" placeholder="MTU2...">
 
   <label>Tu ID de Discord <small>(opcional, para que solo te haga caso a ti)</small></label>
-  <input name="ownerIds" placeholder="607658935800954880">
+  <input name="ownerIds" placeholder="123456789012345678">
 
   <label>Nombre del asistente</label>
   <input name="appName" value="Lumi">

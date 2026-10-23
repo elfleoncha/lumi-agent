@@ -10,6 +10,8 @@ Un solo proceso. Un asistente. Sin base de datos, sin nube obligatoria.
 
 </div>
 
+![Lumi en acción](docs/img/demo.gif)
+
 ![Panel web de Lumi](docs/img/chat.png)
 
 ## Qué es

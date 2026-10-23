@@ -12,6 +12,8 @@ One process. One assistant. No database, no mandatory cloud.
 
 </div>
 
+![Lumi in action](docs/img/demo.gif)
+
 ![Lumi web panel](docs/img/chat.png)
 
 ## What it is
