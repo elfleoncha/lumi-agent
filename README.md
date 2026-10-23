@@ -51,6 +51,13 @@ No es un SaaS ni multiusuario: es *tu* asistente, en *tu* máquina.
 - Habla por Chromecast / Nest con edge-tts o gTTS, con tonos previos y volumen.
 - Alertas con push al móvil (ntfy).
 
+**App Android (opcional)**
+- Cliente WebView con **URL configurable**: la primera vez pide la dirección del
+  servidor y la guarda; se cambia manteniendo pulsada la pantalla.
+- Descargas con `DownloadManager`, selector de ficheros, micrófono y
+  certificado autofirmado aceptado **solo** en redes privadas.
+- Código en `android/`; se compila sin Gradle con `KEYSTORE_PASS=... ./android/build.sh`.
+
 **Extras**
 - **Navegador en vivo**: Chromium persistente con pantalla en vivo embebida en el
   panel y control por API (goto, click, fill, text...). Protegido con token.
@@ -141,6 +148,7 @@ En Discord y en la terminal `lumi`:
 ## Estructura
 
 ```
+android/    app Android (WebView, configurable)
 src/        servidor: bot de Discord, panel web, sesiones, media, voz
 public/     panel web (vanilla JS, sin build)
 bin/        terminal `lumi`

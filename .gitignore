@@ -30,3 +30,12 @@ media/out/
 
 # carpeta de pruebas locales
 /files/
+
+# clave de firma de la APK (nunca al repo)
+*.jks
+*.keystore
+android/gen/
+android/classes/
+android/dex/
+android/*.apk
+android/res.zip
