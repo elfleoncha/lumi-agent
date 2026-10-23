@@ -12,7 +12,7 @@ set -u
 TOKEN=$(node -e '
 const c=require("crypto"),fs=require("fs");
 const s=JSON.parse(fs.readFileSync(process.env.LUMI_SECRET||(process.env.HOME+"/valen-bot/secret.json"),"utf8"));
-const key=c.createHash("sha256").update(String(s.webPassword)+"::valen").digest();
+const key=c.createHash("sha256").update(String(s.webPassword)+ "::lumi").digest();
 console.log(c.createHmac("sha256",key).update("browser:"+new Date().toISOString().slice(0,10)).digest("hex"));
 ' 2>/dev/null)
 API="http://127.0.0.1:4479/do?token=${TOKEN}"

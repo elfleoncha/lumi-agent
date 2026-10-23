@@ -468,7 +468,7 @@ def _secreto():
         return None
     if not pwd:
         return None
-    return hashlib.sha256((pwd + "::valen").encode()).digest()
+    return hashlib.sha256((pwd + "::lumi").encode()).digest()
 
 
 def token_valido(t):

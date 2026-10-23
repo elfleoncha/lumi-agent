@@ -177,7 +177,7 @@ async function sendVoice(target, text) {
     log("TTS falló:", err?.message || err);
     return;
   }
-  const attachment = { attachment: file.path, name: file.voice ? "valen.ogg" : "valen.mp3" };
+  const attachment = { attachment: file.path, name: file.voice ? "lumi.ogg" : "lumi.mp3" };
   try {
     await target.reply({ files: [attachment], allowedMentions: { repliedUser: false } });
   } catch (err) {

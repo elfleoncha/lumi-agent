@@ -9,7 +9,7 @@ export async function notify(title, message, { tags = ["robot"], priority = "def
   const topic = cfg.ntfyTopic;
   if (!topic) return { ok: false, error: "falta ntfyTopic en config.json" };
   // las cabeceras HTTP solo admiten latin-1: los emojis van en el cuerpo
-  const safeTitle = String(title ?? "").replace(/[^\x20-\x7E\xA0-\xFF]/g, "").trim().slice(0, 100) || "Valen";
+  const safeTitle = String(title ?? "").replace(/[^\x20-\x7E\xA0-\xFF]/g, "").trim().slice(0, 100) || "Lumi";
   try {
     const res = await fetch(`https://ntfy.sh/${topic}`, {
       method: "POST",

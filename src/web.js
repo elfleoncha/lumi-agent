@@ -101,7 +101,7 @@ export function createWebServer({ cfg, pool, log, client, PI_BUILTINS }) {
   // conexión". Con firma, el token sobrevive reinicios y dura 30 días.
   // ------------------------------------------------------------------
   const secreto =
-    cfg.webSecret || crypto.createHash("sha256").update(String(cfg.webPassword) + "::valen").digest();
+    cfg.webSecret || crypto.createHash("sha256").update(String(cfg.webPassword) + "::lumi").digest();
   const TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
   function issueToken() {

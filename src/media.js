@@ -62,7 +62,7 @@ export async function downloadAttachments(attachments) {
 
 /** Transcribe un audio a texto con faster-whisper (CPU, int8). */
 export async function transcribe(file) {
-  const model = process.env.VALEN_WHISPER_MODEL || "small";
+  const model = process.env.LUMI_WHISPER_MODEL || process.env.VALEN_WHISPER_MODEL || "small";
   const { stdout } = await run(
     "python3",
     [path.join(SCRIPTS, "transcribe.py"), file, model],
