@@ -28,6 +28,7 @@ if [ "$DESTINO" != "$ORIGEN" ]; then
   mkdir -p "$DESTINO"
   rsync -a --exclude node_modules --exclude .venv --exclude sessions \
         --exclude certs --exclude certs-tls --exclude .git \
+        --exclude config.json --exclude secret.json --exclude links.json \
         --exclude public/files --exclude media --exclude uploads \
         "$ORIGEN"/ "$DESTINO"/
 fi
