@@ -3,6 +3,10 @@
 #
 #   ./android/build.sh
 #
+# Variantes (útil para reemplazar una app ya instalada conservando su paquete):
+#   PAQUETE=com.lumi.client NOMBRE=Lumi ./android/build.sh
+#   PAQUETE=com.leon.minivalen NOMBRE=MiniValen SALIDA=public/files/MiniValen.apk ./android/build.sh
+#
 # Necesita el SDK de Android (build-tools 34.0.0 y platforms/android-34) y
 # `ecj.jar` (compilador de Eclipse, sirve sin JDK completo):
 #
@@ -17,7 +21,9 @@ BT="$SDK/build-tools/34.0.0"
 PLAT="$SDK/platforms/android-34/android.jar"
 RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
 PROY="$RAIZ/android"
-OUT="$RAIZ/public/files/Lumi.apk"
+PAQUETE="${PAQUETE:-com.lumi.client}"
+NOMBRE="${NOMBRE:-Lumi}"
+OUT="${RAIZ}/${SALIDA:-public/files/Lumi.apk}"
 KS="${KEYSTORE:-$PROY/lumi.jks}"
 
 [ -f "$PLAT" ] || { echo "Falta $PLAT (instala platforms;android-34)" >&2; exit 1; }
@@ -39,9 +45,26 @@ EOF
   exit 1
 fi
 
-cd "$PROY"
+# Copia de trabajo: así se puede cambiar el paquete sin tocar el código fuente.
+TRABAJO="$(mktemp -d)"
+trap 'rm -rf "$TRABAJO"' EXIT
+cp -r "$PROY"/src "$PROY"/res "$PROY"/AndroidManifest.xml "$TRABAJO"/
+cd "$TRABAJO"
+
+if [ "$PAQUETE" != "com.lumi.client" ]; then
+  echo "· variante $PAQUETE ($NOMBRE)"
+  RUTA_PAQUETE="$(echo "$PAQUETE" | tr '.' '/')"
+  mkdir -p "src/$RUTA_PAQUETE"
+  mv src/com/lumi/client/*.java "src/$RUTA_PAQUETE"/
+  rm -rf src/com/lumi
+  sed -i "s/^package com\.lumi\.client;/package $PAQUETE;/" "src/$RUTA_PAQUETE"/*.java
+  sed -i "s|package=\"com.lumi.client\"|package=\"$PAQUETE\"|; \
+          s|android:name=\"com.lumi.client.MainActivity\"|android:name=\"$PAQUETE.MainActivity\"|; \
+          s|android:label=\"Lumi\"|android:label=\"$NOMBRE\"|" AndroidManifest.xml
+fi
+
 rm -rf gen classes dex res.zip base.apk aligned.apk
-mkdir -p gen classes dex ../public/files
+mkdir -p gen classes dex "$(dirname "$OUT")"
 
 echo "· recursos"
 "$BT/aapt2" compile --dir res -o res.zip
